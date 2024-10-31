@@ -3,4 +3,6 @@ Strapex is a open source payment gateway akin to Stripe. Whose goal is democrati
 
 
 
-<iframe src="https://drive.google.com/file/d/1LUGaBfCuGRpd8HrAJLeNB-xs9LqZJesm/preview" width="640" height="480" allow="autoplay"></iframe>
+Checkout experience demo:
+https://github.com/user-attachments/assets/9c8908ce-e0cc-44d8-b332-2873ce5cdb5c
+
