@@ -14,7 +14,6 @@ import mailgun from 'mailgun-js';
 dotenv.config();
 
 
-
 const app = express();
 app.use(cors());
 app.use(compression());
@@ -25,8 +24,8 @@ app.use(express.static(path.join(__dirname, '../public')));
 const server = http.createServer(app);
 
 // MongoDB connection URL
-const mongoURL = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@strapexcluster.jn1a7q1.mongodb.net/?retryWrites=true&w=majority&appName=StrapexCluster`;
-const dbName = 'StrapexDB';
+const mongoURL = process.env.MONGO_URL;
+const dbName = process.env.DB_NAME;
 
 // Create a new MongoClient
 const client = new MongoClient(mongoURL);
@@ -133,7 +132,7 @@ app.get('/api/sessions/:sessionId', async (req, res) => {
 
 
 //Health check endpoint
-import { generateHeader, generateCustomerInformation, generateInvoiceTable, generateFooter } from './pdfGenerator';
+import { generateHeader, generateCustomerInformation, generateInvoiceTable, generateFooter } from './utils/pdfGenerator';
 
 app.get('/health', (req, res) => {
     console.log('Health check');
@@ -181,7 +180,7 @@ app.post('/sendEmail', async (req, res) => {
             fs.writeFileSync(pdfPath, pdfData);
 
             // Use Mailgun to send the email
-            const DOMAIN = "mail.strapex.org";
+            const DOMAIN = process.env.MAILGUN_EMAIL_DOMAIN; // Example: "mail.strapex.org"
             const mg = mailgun({ apiKey: process.env.MAILGUN_API_KEY, domain: DOMAIN });
             const data: mailgun.messages.SendData = {
                 from: "orders@strapex.org",
