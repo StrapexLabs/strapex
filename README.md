@@ -1,7 +1,7 @@
 # 🚧 Chore work still ongoing
 Strapex is a open source payment gateway akin to Stripe. Whose goal is democratize access to a free, secure and decentralized way of transacting with businesses.
 
-👁️‍🗨️ Telegram: [t.me/Strapex]
+👁️‍🗨️ Telegram: [t.me/strapexlabs](https://t.me/strapexlabs)
 
 
 
