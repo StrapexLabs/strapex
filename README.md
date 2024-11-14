@@ -1,13 +1,21 @@
-# 🚧 Chore work still ongoing
-Strapex is a open source payment gateway akin to Stripe. Whose goal is democratize access to a free, secure and decentralized way of transacting with businesses.
+# 🚧 Work in progress: Preparing for ODHack 10th Edition
+> :warning: This repository is currently being restructured and refined for the 10th edition of ODHack. Some areas may still be incomplete or unclear.
+
+# Strapex - Open Source alternative to Stripe
+
+Strapex is an open-source payment gateway inspired by Stripe, designed to democratize access to a free, secure, and decentralized way of transacting with businesses. By leveraging Starknet, Strapex enables fast, secure, and cost-effective transactions, while offering the enhanced user experience that Starknet provides.
+
+
+## ⚠️ Important Considerations
+Due to the transparent nature of blockchain, all transactions are publicly visible on the network. This transparency allows for the tracking of individual purchases and business revenue, which may impact privacy for both customers and businesses.
+
 
 👁️‍🗨️ Telegram: [t.me/strapexlabs](https://t.me/strapexlabs)
-🎨 Figma: [Design](https://www.figma.com/design/1ZUxHzVqJw9vlY65cyYyvP/Untitled?node-id=0-1&t=a9OW5jcHrQkMgH0k-1) **Edit permission on issue assingation**
+🎨 Figma: [Design](https://www.figma.com/design/1ZUxHzVqJw9vlY65cyYyvP/Untitled?node-id=0-1&t=a9OW5jcHrQkMgH0k-1) **Edit permission on issue assingation (please DM on Telegram)**
 
 
 
-
-Checkout experience demo:
+Video of the checkout experience demo:
 https://github.com/user-attachments/assets/9c8908ce-e0cc-44d8-b332-2873ce5cdb5c
 
 
