@@ -1,6 +1,3 @@
-# 🚧 Work in progress: Preparing for ODHack 10th Edition
-> :warning: This repository is currently being restructured and refined for the 10th edition of ODHack. Some areas may still be incomplete or unclear.
-
 # Strapex - Open Source alternative to Stripe
 
 Strapex is an open-source payment gateway inspired by Stripe, designed to democratize access to a free, secure, and decentralized way of transacting with businesses. By leveraging Starknet, Strapex enables fast, secure, and cost-effective transactions, while offering the enhanced user experience that Starknet provides.
@@ -17,6 +14,31 @@ Due to the transparent nature of blockchain, all transactions are publicly visib
 
 Video of the checkout experience demo:
 https://github.com/user-attachments/assets/9c8908ce-e0cc-44d8-b332-2873ce5cdb5c
+
+## Contributing
+
+We welcome contributions to Strapex! To contribute, please follow these steps:
+
+1. **Fork the repository** by clicking the [Fork](https://github.com/strapexlabs/strapex/fork) button at the top right of this page.
+2. **Clone your fork** to your local machine:
+   ```bash
+   git clone https://github.com/your-username/strapex.git
+   ```
+3. **Create a new branch** for your feature or bugfix:
+   ```bash
+   git checkout -b feature/your-feature-name
+   ```
+4. **Commit your changes** with clear and descriptive messages:
+   ```bash
+   git commit -m "Add feature: your feature description"
+   ```
+5. **Push your branch** to your forked repository:
+   ```bash
+   git push origin feature/your-feature-name
+   ```
+6. **Open a pull request** from your forked repository to the main repository.
+
+For more detailed guidelines, please refer to the [Git Style Guide](https://udacity.github.io/git-styleguide/).
 
 # Contributors
 
