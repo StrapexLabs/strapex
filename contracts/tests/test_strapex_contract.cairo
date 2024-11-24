@@ -1,8 +1,7 @@
 use starknet::{ContractAddress, contract_address_const, get_caller_address};
 
-use snforge_std as snf;
 use snforge_std::{
-    ContractClassTrait, EventSpy, spy_events
+    declare, ContractClassTrait
 };
 
 use contract_strapex::strapex_factory::{
@@ -15,8 +14,8 @@ use contract_strapex::strapex_contract::{
 
 fn deploy_factory() -> ContractAddress {
     
-    let factory_contract = snf::declare('strapex_factory');
-    let child_contract = snf::declare('strapex_contract');
+    let factory_contract = declare('strapex_factory');
+    let child_contract = declare('strapex_contract');
     let child_contract_felt: felt252 = child_contract.class_hash.into();
     let mut calldata: Array<felt252> = array![
         contract_address_const::<'OWNER'>().into(),
