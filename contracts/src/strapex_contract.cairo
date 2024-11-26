@@ -30,7 +30,7 @@ trait IStrapex<TContractState> {
 }
 
 #[starknet::contract]
-mod strapex_contract {
+pub mod StrapexContract {
     use contract_strapex::strapex_contract::IStrapex;
     use core::traits::Into;
     use core::box::BoxTrait;

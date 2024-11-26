@@ -15,7 +15,7 @@ trait IStrapexFactory<TContractState> {
 }
 
 #[starknet::contract]
-mod strapex_factory {
+pub mod StrapexFactory {
     use core::traits::Into;
     use core::array::ArrayTrait;
     // Core StarkNet and contract utilities.
