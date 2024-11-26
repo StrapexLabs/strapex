@@ -1,5 +1,6 @@
 import { MongoClient } from "mongodb";
 import { NextRequest, NextResponse } from 'next/server';
+import { SessionData } from '@/types';
 
 export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
@@ -16,6 +17,30 @@ export async function GET(req: NextRequest) {
 
     console.log("sessionId", sessionId);
     console.log("dbName", dbName);
+
+    if (sessionId === 'test') {
+        const mockSession: SessionData = {
+            sessionId: 'test',
+            totalPrice: 100,
+            totalPriceToken: 'STRK',
+            payment_type: 'onetime',
+            successUrl: 'https://example.com/success',
+            cancelUrl: 'https://example.com/cancel',
+            depositAddress: '0x55cce8396655fabebb24ed6e5f5c4543021a0e1b4d9e3a15d0640014b29b3ae',
+            lineItems: [
+                {
+                    id: 'item1',
+                    name: 'Mock Product',
+                    price: 50,
+                    currency: 'STRK',
+                    quantity: 2,
+                }
+            ],
+            status: 'pending',
+        };
+        return NextResponse.json(mockSession);
+    }
+
     let client;
     try {
         const connectionString = process.env.DB_CONNECTION_STRING;
