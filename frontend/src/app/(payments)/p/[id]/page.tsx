@@ -1,5 +1,5 @@
 "use client"
-import { Button, Dialog, Flex, RadioCards, Skeleton } from "@radix-ui/themes";
+import { Button } from "@radix-ui/themes";
 import { use, useEffect, useState } from "react";
 import { Account, BigNumberish, CallData, Uint256, cairo, uint256 } from "starknet";
 import { StarknetWindowObject, connect, disconnect } from "starknetkit";
@@ -11,7 +11,7 @@ import { ShippingAddress } from "../../../../components/shippingAddressForm";
 import { delay, formatSignificantDigits } from "../../../../utils/helpers";
 import tokensList from "../../../../lib/tokens.json";
 import { fetchTokenBalances } from "../../../../services/tokenService";
-import { Balance, SessionData, Payment_type, Token } from "../../../../types";
+import { Balance, SessionData, Payment_type, Token, TokenToPayWith, TotalPrice } from "../../../../types";
 import { QRCodeSVG } from 'qrcode.react';
 import ShippingAddressForm from "../../../../components/shippingAddressForm";
 import ContactInformationForm, { ContactInformation } from "@/components/contactInformationForm";
@@ -22,27 +22,12 @@ import { ChevronLeftIcon, ChevronRightIcon } from "@radix-ui/react-icons";
 import { useProvider } from "@/contexts/ProviderContext";
 import { isContactInformationFilled, isShippingAddressFilled } from "../../../../utils/filledChecker";
 import { getDatabaseName } from "@/services/databaseService";
+import SelectPaymentTokenModal from "@/components/selectPaymentTokenModal";
 
 dotenv.config();
 interface CheckoutPageProps {
   params: { id: string; };
 }
-
-type TotalPrice = {
-  priceInBaseToken: bigint;
-  baseTokenAddress: string;
-  baseTokenTicker: string;
-  baseTokenDecimals: number;
-  priceInUSDC: bigint;
-};
-
-type TokenToPayWith = {
-  tokenAddress: string;
-  quoteId: string;
-  slippage?: number;
-  executeApprove?: boolean;
-  options?: any;
-};
 
 const AVNU_OPTIONS = { baseUrl: 'https://starknet.api.avnu.fi' };
 
@@ -337,12 +322,12 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
   //When detecting a change in address, the goal is to fetch the balances of the address so the user can choose to pay with "any coin"
   useEffect(() => {
     if (address) {
+      setQuotesLoading(true);
       console.log("Address", address);
       console.log("Provider", providerContext.provider, providerContext.network);
       fetchTokenBalances(address, providerContext.provider).then((balances) => {
         console.log("Balances", balances);
         setAddressBalances(balances);
-        setQuotesLoading(true);
       });
     }
   }, [address]);
@@ -668,7 +653,7 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
                   onValueChange={setActiveSection}
                 >
 
-                {/* Shipping Address Form */}
+                {/* Contact Information Form */}
                 {sessionData.shipping_address_collection == "required" && (
                   <Accordion.Item className="AccordionItem" value="item-1">
                     <Accordion.AccordionHeader className="AccordionHeader py-4">
@@ -713,6 +698,7 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
                     <QRCodeSVG value={qrContent} height={256} width={256} />
                   )}
 
+                  {/* Payment */}
                   <Accordion.Item className="AccordionItem" value="item-3">
                     <Accordion.AccordionHeader className="AccordionHeader py-4">
                       <Accordion.AccordionTrigger className="AccordionTrigger w-full flex flex-row justify-between items-center">
@@ -737,151 +723,18 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
                         </div>
 
                         {account ? (
-                          <Dialog.Root open={isTokenSelectionOpen} onOpenChange={(isOpen) => setIsTokenSelectionOpen(isOpen)}>
-                            <Dialog.Trigger>
-                              {tokenToPayWith == null ? (
-                                <Button className="bg-neutral-800">Select Payment Token</Button>
-                              ) : (
-                                (() => {
-                                  console.log("Selected token address", tokenToPayWith.tokenAddress);
-
-                                  let token = tokensList.find((token) => token.address === tokenToPayWith.tokenAddress);
-                                  let tokenImage = token?.image;
-
-                                  const quoteForToken = quotes.find(
-                                    (quote) => quote.sellTokenAddress.slice(-63).toUpperCase() === token?.address.slice(-63).toUpperCase()
-                                  );
-
-                                  const amountInUsd = quoteForToken ? quoteForToken.sellAmountInUsd : 0;
-                                  const amount = quoteForToken ? quoteForToken.sellAmount : BigInt(0);
-                                  const formattedAmount = formatUnits(amount, token?.decimals);
-                                  const formattedAmountSignificant = formatSignificantDigits(formattedAmount);
-
-                                  return (
-                                    <button className="flex flex-row items-center border border-gray-200 p-2 rounded">
-                                      <img src={tokenImage} alt={tokenToPayWith.tokenAddress} className="w-6 h-6 inline-block mb-2" />
-                                      <div className="flex flex-col">
-                                        <span className="text-sm">{formattedAmountSignificant} {token?.ticker}</span>
-                                        <span className="text-xs text-gray-500">({amountInUsd.toFixed(2)} USD)</span>
-                                      </div>
-                                      <ChevronRightIcon className="w-4 h-4" />
-                                    </button>
-                                  );
-                                })()
-                              )}
-                            </Dialog.Trigger>
-                            <Dialog.Content maxWidth="600px">
-                              <Dialog.Title>Select Payment Token</Dialog.Title>
-                              <Dialog.Description size="2" mb="4">
-                                Choose the token you want to use for payment.
-                              </Dialog.Description>
-
-                              <RadioCards.Root defaultValue={tokenToPayWith?.tokenAddress ?? undefined} onValueChange={(value) => fetchAndSetPrependedSwapCalls(value)} columns={{ initial: '1' }}>
-                                {addressBalances.map((balance, index) => {
-                                  // Normalize addresses by slicing the last 63 characters
-                                  const normalizedBalanceAddress = balance.address.slice(-63).toUpperCase();
-                                  console.log("Normalized balance address", normalizedBalanceAddress);
-
-                                  // Find the token in the tokensList based on the normalized address
-                                  const token = tokensList.find(
-                                    (token) => token.address.slice(-63).toUpperCase() === normalizedBalanceAddress
-                                  );
-
-                                  if (token && token.address === priceInToken?.baseTokenAddress) {
-                                    // Handle ETH token separately
-                                    const baseTokenAmount = priceInToken ? formatUnits(priceInToken.priceInBaseToken, priceInToken.baseTokenDecimals) : "0";
-                                    const formattedBaseTokenAmount = formatSignificantDigits(baseTokenAmount);
-                                    const baseTokenAmountInUsd = priceInToken ? formatUnits(priceInToken.priceInUSDC, 6) : "0";
-                                    console.log("Total price by session data", sessionData.totalPrice);
-
-                                    const isThereEnough = balance.balance * 10 ** token.decimals >= priceInToken?.priceInBaseToken;
-
-                                    return (
-                                      <RadioCards.Item key={index} value={token.address} disabled={!isThereEnough}>
-                                        <Flex direction="column" width="100%">
-                                          <img src={token.image} alt={token.ticker} className="w-6 h-6 inline-block mb-2" />
-                                          <Text weight="bold">{formattedBaseTokenAmount} {priceInToken?.baseTokenTicker}</Text>
-                                          <Text>({Number(baseTokenAmountInUsd).toFixed(2)} USD)</Text>
-                                          {!isThereEnough && (
-                                            <Text size="1" color="red">
-                                              Not Enough Balance
-                                            </Text>
-                                          )}
-                                        </Flex>
-                                      </RadioCards.Item>
-                                    );
-                                  } else if (token && balance.balance > 0) {
-                                    // Handle other tokens using quotes and check if balance is greater than 0
-                                    const quoteForToken = quotes.find(
-                                      (quote) => quote.sellTokenAddress.slice(-63).toUpperCase() === normalizedBalanceAddress
-                                    );
-                                    if (!quoteForToken) {
-                                      return null;
-                                    }
-                                    console.log("Quote for token", quoteForToken);
-                                    console.log("Wallet token balance", balance.balance);
-                                    console.log("Needed balance", quoteForToken?.sellAmount);
-                                    const isThereEnough = balance.balance * 10 ** token.decimals >= quoteForToken?.sellAmount;
-                                    const amountInUsd = quoteForToken ? quoteForToken.sellAmountInUsd : 0;
-                                    const amount = quoteForToken ? quoteForToken.sellAmount : BigInt(0);
-                                    const formattedAmount = formatUnits(amount, token.decimals);
-                                    const formattedAmountSignificant = formatSignificantDigits(formattedAmount);
-
-                                    return (
-                                      <RadioCards.Item key={index} value={token.address} disabled={!isThereEnough} >
-                                        <Flex direction="column" width="100%">
-                                          <img src={token.image} alt={token.ticker} className="w-6 h-6 inline-block mb-2" />
-                                          <Text weight="bold">{formattedAmountSignificant} {token.ticker}</Text>
-                                          <Text>({amountInUsd.toFixed(2)} USD)</Text>
-                                          {!isThereEnough && (
-                                            <Text size="1" color="red">
-                                              Not Enough Balance
-                                            </Text>
-                                          )}
-                                        </Flex>
-                                      </RadioCards.Item>
-                                    );
-                                  }
-                                  // Token not found in the tokensList
-                                  return null;
-                                })}
-
-                                {quotesLoading ? (
-                                  <Skeleton loading={true}>
-                                    <RadioCards.Root>
-                                      <RadioCards.Item value="dummy1">
-                                        <Flex direction="column" width="100%">
-                                          <Text>Loading...</Text>
-                                          <Button variant="soft" color="gray">Loading...</Button>
-                                          <Button variant="soft" color="gray">Loading...</Button>
-                                        </Flex>
-                                      </RadioCards.Item>
-                                      <RadioCards.Item value="dummy2">
-                                        <Flex direction="column" width="100%">
-                                          <Text>Loading...</Text>
-                                          <Button variant="soft" color="gray">Loading...</Button>
-                                          <Button variant="soft" color="gray">Loading...</Button>
-                                        </Flex>
-                                      </RadioCards.Item>
-                                    </RadioCards.Root>
-                                  </Skeleton>
-
-                                ) : (
-                                  <></>
-                                )}
-                              </RadioCards.Root>
-                              <Flex gap="3" mt="4" justify="end">
-                                <Dialog.Close>
-                                  <Button variant="soft" color="gray">
-                                    Cancel
-                                  </Button>
-                                </Dialog.Close>
-                                <Dialog.Close>
-                                  <Button className="bg-neutral-800" onClick={() => fetchAndSetPrependedSwapCalls(tokenToPayWith?.tokenAddress ?? "")}>Confirm</Button>
-                                </Dialog.Close>
-                              </Flex>
-                            </Dialog.Content>
-                          </Dialog.Root>
+                          <SelectPaymentTokenModal    
+                              sessionData={sessionData}
+                              isTokenSelectionOpen={isTokenSelectionOpen}
+                              setIsTokenSelectionOpen={setIsTokenSelectionOpen}
+                              tokenToPayWith={tokenToPayWith}
+                              tokensList={tokensList}
+                              fetchAndSetPrependedSwapCalls={fetchAndSetPrependedSwapCalls}
+                              addressBalances={addressBalances}
+                              quotes={quotes}
+                              priceInToken={priceInToken}
+                              quotesLoading={quotesLoading}
+                          />
                         ) : (
                           <Button onClick={connectToStarknet} className="bg-neutral-800" size="3">
                             <img src="/walletIcon.svg" alt="wallet" className="w-6 h-6 inline-block mr-2 " />
@@ -891,7 +744,8 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
                       </div>
                       <Button
                         onClick={payWithStarknet}
-                        className="w-full text-white px-6 py-3 rounded font-semibold"
+                        style={{width: "100%"}}
+                        className="min-w-full w-full text-white px-6 py-3 rounded font-semibold"
                         size="3"
                         color="blue"
                         disabled={account === null || priceInToken === null || tokenToPayWith === null}

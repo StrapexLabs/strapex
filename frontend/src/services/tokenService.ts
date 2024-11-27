@@ -50,7 +50,7 @@ const getAccountBalance = async (tokenAddress: string, selector: string, walletA
         const result = await myTestContract.balanceOf(walletAddress);
         const balanceInGwei = parseInt(result);
         const balanceInEther = balanceInGwei / 10 ** 18; // Convert from gwei to ether
-        console.log("Found in this y (wallet) this x amount", balanceInEther);
+        console.log(`Found in this wallet (${walletAddress}) this ${balanceInEther} amount`, balanceInEther);
         return balanceInEther;
     } catch (error) {
         console.error(`Error fetching balance for ${walletAddress}:`, error);
