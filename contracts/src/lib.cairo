@@ -1,3 +1,3 @@
-mod ownership_component;
-mod strapex_contract;
-mod strapex_factory;
+pub mod ownership_component;
+pub mod strapex_contract;
+pub mod strapex_factory;
