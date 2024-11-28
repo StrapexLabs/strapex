@@ -2,7 +2,7 @@ import { AVNU_OPTIONS, Balance, SessionData, Token, TokenToPayWith, TotalPrice }
 import { formatSignificantDigits } from '@/utils/helpers';
 import { Quote } from '@avnu/avnu-sdk';
 import { ChevronRightIcon } from '@radix-ui/react-icons';
-import { Button, Dialog, Flex, RadioCards, Skeleton, Slider, Text } from '@radix-ui/themes';
+import { Box, Button, Dialog, Flex, RadioCards, Skeleton, Slider, Text } from '@radix-ui/themes';
 import { formatUnits } from 'ethers';
 import { Dispatch, SetStateAction } from 'react';
 
@@ -40,7 +40,7 @@ const SelectPaymentTokenModal = ({
     <Dialog.Root open={isTokenSelectionOpen} onOpenChange={(isOpen) => setIsTokenSelectionOpen(isOpen)}>
     <Dialog.Trigger>
       {tokenToPayWith == null ? (
-        <Button className="bg-neutral-800">Select Payment Token</Button>
+        <Button className="bg-neutral-800 mb-5">Select Payment Token</Button>
       ) : (
         (() => {
           console.log("Selected token address", tokenToPayWith.tokenAddress);
@@ -70,117 +70,104 @@ const SelectPaymentTokenModal = ({
         })()
       )}
     </Dialog.Trigger>
-    <Dialog.Content maxWidth="530px">
+    <Dialog.Content minWidth="500px" maxWidth="max-content">
       <Dialog.Title>Select Payment Token</Dialog.Title>
-      {/* <Dialog.Description size="2" mb="4">
-        Choose the token you want to use for payment.
-      </Dialog.Description> */}
 
-      <RadioCards.Root defaultValue={tokenToPayWith?.tokenAddress ?? undefined} onValueChange={(value) => fetchAndSetPrependedSwapCalls(value)} columns={{ initial: '2' }}>
+      <RadioCards.Root defaultValue={tokenToPayWith?.tokenAddress ?? undefined} onValueChange={(value) => fetchAndSetPrependedSwapCalls(value)} className='grid grid-cols-2' columns={{ initial: '2' }}>
         {quotesLoading ? (
-              <RadioCards.Root columns={{ initial: '2' }}>
-                <RadioCards.Item value="dummy1">
-                  <Flex direction="column" width="100%">
+              <>
+                <RadioCards.Item className='' value="dummy1">
+                  <Flex direction="column" width="209px">
                     <Text><Skeleton>Loading...</Skeleton></Text>
                     <Button variant="soft" color="gray"><Skeleton>Loading...</Skeleton></Button>
                   </Flex>
                 </RadioCards.Item>
-                <RadioCards.Item value="dummy2">
-                  <Flex direction="column" width="100%">
+                <RadioCards.Item className='' value="dummy2">
+                  <Flex direction="column" width="209px">
                     <Text><Skeleton> Loading...</Skeleton></Text>
                     <Button variant="soft" color="gray"><Skeleton> Loading... </Skeleton></Button>
                   </Flex>
                 </RadioCards.Item>
-              </RadioCards.Root>
+              </>
           ) : (
             <>
-               {addressBalances.map((balance, index) => {
-                  // Normalize addresses by slicing the last 63 characters
-                  const normalizedBalanceAddress = balance.address.slice(-63).toUpperCase();
-                  console.log("Normalized balance address", normalizedBalanceAddress);
+              {addressBalances.map((balance, index) => {
+                const normalizedBalanceAddress = balance.address.slice(-63).toUpperCase();
+                const token = tokensList.find(
+                  (token) => token.address.slice(-63).toUpperCase() === normalizedBalanceAddress
+                );
+                console.log("Balance of", token, "is", token);
 
-                  // Find the token in the tokensList based on the normalized address
-                  const token = tokensList.find(
-                    (token) => token.address.slice(-63).toUpperCase() === normalizedBalanceAddress
+                // if (!token || balance.balance <= 0) return null
+                
+
+                let isThereEnough = false;
+                let formattedAmount, amountInUsd, ticker;
+
+                if (token.address === priceInToken?.baseTokenAddress) {
+                  // ETH or base token case
+                  const baseTokenAmount = formatUnits(priceInToken?.priceInBaseToken || 0, priceInToken?.baseTokenDecimals || 18);
+                  formattedAmount = formatSignificantDigits(baseTokenAmount);
+                  amountInUsd = formatUnits(priceInToken?.priceInUSDC || 0, 6);
+                  ticker = priceInToken?.baseTokenTicker;
+                  isThereEnough = balance.balance * 10 ** token.decimals >= priceInToken?.priceInBaseToken;
+                } else {
+                  // Other tokens using quotes
+                  const quoteForToken = quotes.find(
+                    (quote) => quote.sellTokenAddress.slice(-63).toUpperCase() === normalizedBalanceAddress
                   );
-                  console.log("The token is", token)
-                  console.log("price in token", priceInToken)
-                  if (token && token.address === priceInToken?.baseTokenAddress) {
-                    // Handle ETH token separately
-                    const baseTokenAmount = priceInToken ? formatUnits(priceInToken.priceInBaseToken, priceInToken.baseTokenDecimals) : "0";
-                    const formattedBaseTokenAmount = formatSignificantDigits(baseTokenAmount);
-                    const baseTokenAmountInUsd = priceInToken ? formatUnits(priceInToken.priceInUSDC, 6) : "0";
-                    console.log("Total price by session data", sessionData?.totalPrice);
-                    console.log("Here is the balance", balance)
-                    console.log("priceintoken", priceInToken)
-                    const isThereEnough = balance.balance * 10 ** token.decimals >= priceInToken?.priceInBaseToken;
+                  if (!quoteForToken) return null;
 
-                    return (
-                      <RadioCards.Item key={index} value={token.address} disabled={!isThereEnough}>
-                        <Flex direction="row" align="center" width="100%">
-                            <img src={token.image} alt={token.ticker} className="w-6 h-6 inline-block mb-2" />
-                            <Flex direction="column" align="center" width="100%">
-                                <Text weight="bold">{formattedBaseTokenAmount} {priceInToken?.baseTokenTicker}</Text>
-                                <Text>({Number(baseTokenAmountInUsd).toFixed(2)} USD)</Text>
-                                {!isThereEnough && (
-                                    <Text size="1" color="red">
-                                    Not Enough Balance
-                                    </Text>
-                                )}
-                            </Flex>
-                        </Flex>
-                      </RadioCards.Item>
-                    );
-                  } else if (token && balance.balance > 0) {
-                    // Handle other tokens using quotes and check if balance is greater than 0
-                    const quoteForToken = quotes.find(
-                      (quote) => quote.sellTokenAddress.slice(-63).toUpperCase() === normalizedBalanceAddress
-                    );
-                    if (!quoteForToken) {
-                      return null;
-                    }
-                    console.log("Quote for token", quoteForToken);
-                    console.log("Wallet token balance", balance.balance);
-                    console.log("Needed balance", quoteForToken?.sellAmount);
-                    const isThereEnough = balance.balance * 10 ** token.decimals >= quoteForToken?.sellAmount;
-                    const amountInUsd = quoteForToken ? quoteForToken.sellAmountInUsd : 0;
-                    const amount = quoteForToken ? quoteForToken.sellAmount : BigInt(0);
-                    const formattedAmount = formatUnits(amount, token.decimals);
-                    const formattedAmountSignificant = formatSignificantDigits(formattedAmount);
+                  const sellAmount = quoteForToken.sellAmount || BigInt(0);
+                  console.log("sell", sellAmount)
+                  formattedAmount = formatSignificantDigits(formatUnits(sellAmount, token.decimals));
+                  console.log("formatted amount", formattedAmount)
+                  amountInUsd = quoteForToken.sellAmountInUsd || 0;
+                  console.log("amount in usd", amountInUsd)
+                  ticker = token.ticker;
+                  isThereEnough = balance.balance * 10 ** token.decimals >= sellAmount;
+                  console.log("is there enough", isThereEnough)
+                }
 
-                    return (
-                      <RadioCards.Item key={index} value={token.address} disabled={!isThereEnough} >
-                        <Flex direction="row" align="center" width="100%">
-                          <img src={token.image} alt={token.ticker} className="w-6 h-6 inline-block mb-2" />
-                          <Flex direction="column" align="center" width="100%">
-                            <Text weight="bold">{formattedAmountSignificant} {token.ticker}</Text>
-                            <Text>({amountInUsd.toFixed(2)} USD)</Text>
-                            {!isThereEnough && (
-                              <Text size="1" color="red">
-                                Not Enough Balance
-                              </Text>
-                            )}
-                          </Flex>
+                return (
+                  <RadioCards.Item className='min-w-[204px] p-0' key={index} value={token.address} disabled={!isThereEnough}>
+                    <Flex direction="column" width="100%">
+                      <Flex direction="row" align="center" gapX="2" width="100%">
+                        <img src={token.image} alt={ticker} width={50} height={50} className="inline-block" />
+                        <Flex direction="column" className='align-center gap-2 justify-center' align="center" width="100%">
+                          <Text className="text-2xl">
+                            {formattedAmount} {ticker}
+                          </Text>
+                          <Text className='text-base' color="gray">
+                            ({Number(amountInUsd).toFixed(2)} USD)
+                          </Text>
                         </Flex>
-                      </RadioCards.Item>
-                    );
-                  }
-                  // Token not found in the tokensList
-                  return null;
-                })}
-                <Slider defaultValue={[10]} />
+                      </Flex>
+                      <Flex direction="row" align="end" justify="center" className='mt-2 mr-6' width="100%">
+                          {!isThereEnough && (
+                            <Text size="1" color="red">
+                              Not Enough Balance
+                            </Text>
+                          )}
+                      </Flex>
+                    </Flex>
+                  </RadioCards.Item>
+                );
+              })}
             </>
           )}
-        
       </RadioCards.Root>
+      <Box width="100%" className='bg-zinc-100 rounded p-3' mt="9">
+        {/* <Flex>
+
+        </Flex> */}
+        <Flex gap="3" mt="4" justify="end">
+          <Slider defaultValue={[0]} />
+        </Flex>
+      </Box>
       <Flex gap="3" mt="4" justify="end">
-        {/* <Dialog.Close>
-          <Button variant="soft" color="gray">
-            Cancel
-          </Button>
-        </Dialog.Close> */}
         <Dialog.Close>
-          <Button className="bg-black" onClick={() => fetchAndSetPrependedSwapCalls(tokenToPayWith?.tokenAddress ?? "")}>Confirm</Button>
+          <Button className="bg-black" style={{backgroundColor: "black"}} onClick={() => fetchAndSetPrependedSwapCalls(tokenToPayWith?.tokenAddress ?? "")}>Confirm</Button>
         </Dialog.Close>
       </Flex>
     </Dialog.Content>
