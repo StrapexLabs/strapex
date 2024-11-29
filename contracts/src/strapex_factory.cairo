@@ -16,6 +16,7 @@ trait IStrapexFactory<TContractState> {
 
 #[starknet::contract]
 pub mod StrapexFactory {
+    use starknet::storage::Map;
     use core::traits::Into;
     use core::array::ArrayTrait;
     // Core StarkNet and contract utilities.
@@ -35,7 +36,7 @@ pub mod StrapexFactory {
     #[storage]
     struct Storage {
         strapexChildHash: ClassHash,
-        strapexChildOwner: LegacyMap<ContractAddress, ContractAddress>,
+        strapexChildOwner: Map<ContractAddress, ContractAddress>,
         totalStrapexAccountsNo: u128,
         depositToken: ContractAddress,
         #[substorage(v0)]

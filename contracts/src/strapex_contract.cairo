@@ -16,6 +16,7 @@ trait IStrapex<TContractState> {
 
 #[starknet::contract]
 pub mod StrapexContract {
+    use starknet::storage::Map;
     use contract_strapex::strapex_contract::IStrapex;
     use core::traits::Into;
     use core::box::BoxTrait;
@@ -34,7 +35,7 @@ pub mod StrapexContract {
     #[storage]
     struct Storage {
         token: IERC20Dispatcher,
-        owner: ContractAddress, //Owner of the biz
+        owner_addr: ContractAddress, //Owner of the biz
         balance: u256,
         fee_percentage: u256,
         fees_collected: u256,
@@ -43,7 +44,7 @@ pub mod StrapexContract {
         manager: ContractAddress, //Platform manager
         // Allow multiple buys from one address
         // tx_hash -> ( buyer, amount, token, id, refunded)
-        payments: LegacyMap::<felt252, Payment>,
+        payments: Map::<felt252, Payment>,
         #[substorage(v0)]
         ownable: ownable_component::Storage,
     }
@@ -59,7 +60,7 @@ pub mod StrapexContract {
 
     #[event]
     #[derive(Drop, starknet::Event)]
-    enum Event {
+    pub enum Event {
         OwnableEvent: ownable_component::Event,
         Deposit: Deposit,
         Withdraw: Withdraw,
@@ -67,7 +68,7 @@ pub mod StrapexContract {
     }
 
     #[derive(Drop, starknet::Event)]
-    struct Deposit {
+    pub struct Deposit {
         #[key]
         from: ContractAddress,
         #[key]
@@ -78,13 +79,13 @@ pub mod StrapexContract {
     }
 
     #[derive(Drop, starknet::Event)]
-    struct Withdraw {
+    pub struct Withdraw {
         #[key]
         Amount: u256,
     }
 
     #[derive(Drop, starknet::Event)]
-    struct FeeCollection {
+    pub struct FeeCollection {
         #[key]
         Amount: u256,
     }
@@ -107,7 +108,7 @@ pub mod StrapexContract {
         _token: ContractAddress
     ) {
         assert(!_owner.is_zero(), Errors::Address_Zero_Owner);
-        self.owner.write(_owner);
+        self.owner_addr.write(_owner);
         self.token.write(IERC20Dispatcher { contract_address: _token });
         self.fee_percentage.write(50); // 0.5%
         self.manager.write(manager);
@@ -155,7 +156,7 @@ pub mod StrapexContract {
 
         fn withdraw(ref self: ContractState) {
             let caller: ContractAddress = get_caller_address();
-            let owner = self.owner.read();
+            let owner = self.owner_addr.read();
             assert(caller == owner, Errors::UnAuthorized_Caller);
 
             let taxable_amount: u256    = self.taxable_amount.read();
@@ -185,7 +186,7 @@ pub mod StrapexContract {
 
         fn withdraw_amount(ref self: ContractState, amount: u256) {
             let caller: ContractAddress = get_caller_address();
-            let owner = self.owner.read();
+            let owner = self.owner_addr.read();
             assert(caller == owner, Errors::UnAuthorized_Caller);
 
             let current_balance: u256 = self.balance.read();
@@ -219,7 +220,7 @@ pub mod StrapexContract {
 
         fn set_fee(ref self: ContractState, new_fee: u256) {
             let caller: ContractAddress = get_caller_address();
-            assert(caller == self.owner.read(), Errors::UnAuthorized_Caller);
+            assert(caller == self.owner_addr.read(), Errors::UnAuthorized_Caller);
             self.fee_percentage.write(new_fee);
         }
 
@@ -247,7 +248,7 @@ pub mod StrapexContract {
 
         fn refund(ref self: ContractState, tx_hash: felt252) {
             let caller: ContractAddress = get_caller_address();
-            let owner = self.owner.read();
+            let owner = self.owner_addr.read();
             assert(caller == owner, Errors::UnAuthorized_Caller);
 
             let (_, _, _) = self.getImportantAddresses();
@@ -263,7 +264,7 @@ pub mod StrapexContract {
 
         fn refund_amount(ref self: ContractState, tx_hash: felt252, amount: u256) {
             let caller: ContractAddress = get_caller_address();
-            let owner = self.owner.read();
+            let owner = self.owner_addr.read();
             assert(caller == owner, Errors::UnAuthorized_Caller);
 
             let (_, _, _) = self.getImportantAddresses();
@@ -283,7 +284,7 @@ pub mod StrapexContract {
 
         fn get_fees_to_collect(self: @ContractState) -> u256 {
             let caller: ContractAddress = get_caller_address();
-            let owner = self.owner.read();
+            let owner = self.owner_addr.read();
             assert(caller == owner || caller == self.manager.read(), Errors::UnAuthorized_Caller);
 
             let current_balance: u256 = self.balance.read();
