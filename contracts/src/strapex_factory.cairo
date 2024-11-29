@@ -27,6 +27,7 @@ pub mod StrapexFactory {
     use core::starknet::event::EventEmitter;
     use contract_strapex::ownership_component::IOwnable;
     use contract_strapex::ownership_component::ownable_component;
+    use starknet::storage::Map;
     component!(path: ownable_component, storage: ownable, event: OwnableEvent);
 
     #[abi(embed_v0)]
