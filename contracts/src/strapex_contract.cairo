@@ -158,7 +158,7 @@ pub mod StrapexContract {
             let owner = self.ownable.owner();
             assert(caller == owner, Errors::UnAuthorized_Caller);
 
-            let taxable_amount: u256    = self.taxable_amount.read();
+            let taxable_amount: u256 = self.taxable_amount.read();
             let fee_percentage = self.fee_percentage.read();
             let fee_amount = taxable_amount * fee_percentage / 100;
             let withdrawal_amount = self.balance.read() - fee_amount;
@@ -242,7 +242,7 @@ pub mod StrapexContract {
             // Optionally update fees collected
             let updated_fees_collected = self.fees_collected.read() + fee_amount;
             self.fees_collected.write(updated_fees_collected);
-        // Emit an event if necessary
+            // Emit an event if necessary
         }
 
         fn refund(ref self: ContractState, tx_hash: felt252) {
@@ -251,7 +251,7 @@ pub mod StrapexContract {
             assert(caller == owner, Errors::UnAuthorized_Caller);
 
             let (_, _, _) = self.getImportantAddresses();
-            let Payment{buyer, amount, token, id, refunded } = self.payments.read(tx_hash);
+            let Payment { buyer, amount, token, id, refunded } = self.payments.read(tx_hash);
             assert(refunded == 0.into(), Errors::Already_Refunded);
 
             // Generalized for future support of multi tokens
@@ -267,14 +267,21 @@ pub mod StrapexContract {
             assert(caller == owner, Errors::UnAuthorized_Caller);
 
             let (_, _, _) = self.getImportantAddresses();
-            let Payment{buyer, amount: total_amount, token, id, refunded } = self.payments.read(tx_hash);
+            let Payment { buyer, amount: total_amount, token, id, refunded } = self
+                .payments
+                .read(tx_hash);
             assert(refunded + amount <= total_amount, Errors::Refund_Exceeds_Amount);
 
             // Generalized for future support of multi tokens
             let tokenDispatch = IERC20Dispatcher { contract_address: token };
             tokenDispatch.transfer(buyer, amount.into());
 
-            self.payments.write(tx_hash, Payment { buyer, amount: total_amount, token, id, refunded: refunded + amount });
+            self
+                .payments
+                .write(
+                    tx_hash,
+                    Payment { buyer, amount: total_amount, token, id, refunded: refunded + amount }
+                );
         }
 
         fn get_fee_percentage(self: @ContractState) -> u256 {

@@ -8,7 +8,9 @@ trait IOwnable<TContractState> {
 
 #[starknet::component]
 mod ownable_component {
-    use starknet::{get_caller_address, ContractAddress, get_contract_address, Zeroable, get_block_timestamp};
+    use starknet::{
+        get_caller_address, ContractAddress, get_contract_address, Zeroable, get_block_timestamp
+    };
     use super::Errors;
 
     #[storage]
@@ -30,7 +32,8 @@ mod ownable_component {
 
     #[embeddable_as(Ownable)]
     impl OwnableImpl<
-        TContractState, +HasComponent<TContractState>> of super::IOwnable<ComponentState<TContractState>> {
+        TContractState, +HasComponent<TContractState>
+    > of super::IOwnable<ComponentState<TContractState>> {
         fn owner(self: @ComponentState<TContractState>) -> ContractAddress {
             self.owner.read()
         }
@@ -50,7 +53,9 @@ mod ownable_component {
     }
 
     #[generate_trait]
-    impl InternalImpl<TContractState, +HasComponent<TContractState>> of InternalTrait<TContractState> {
+    impl InternalImpl<
+        TContractState, +HasComponent<TContractState>
+    > of InternalTrait<TContractState> {
         fn initializer(ref self: ComponentState<TContractState>, owner: ContractAddress) {
             self._transfer_ownership(owner);
         }
