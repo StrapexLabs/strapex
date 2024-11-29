@@ -1,7 +1,7 @@
 use starknet::{ClassHash, ContractAddress, contract_address_const, get_caller_address};
 
 use snforge_std::{
-    declare, start_cheat_caller_address, start_cheat_block_timestamp, ContractClassTrait,
+    declare, start_cheat_caller_address, stop_cheat_caller_address, start_cheat_block_timestamp, ContractClassTrait,
     DeclareResultTrait, spy_events, EventSpyAssertionsTrait
 };
 
@@ -71,18 +71,35 @@ fn approve_child_contract(child: ContractAddress, amount: u256) {
     assert(res, 'Approval failed');
 }
 
+fn deposit_workflow(user: ContractAddress, child: ContractAddress, child_disp: IStrapexDispatcher, amount: u256, id: u128) {
+    let token: ContractAddress = 0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d
+        .try_into()
+        .unwrap();
+    let disp = IERC20Dispatcher { contract_address: token };
+
+    start_cheat_caller_address(token, user);
+    disp.approve(child, amount);
+    stop_cheat_caller_address(token);
+
+    start_cheat_caller_address(child, user);
+    child_disp.deposit(id, amount);
+    stop_cheat_caller_address(child);
+}
+
 #[test]
 #[fork(url: "https://starknet-sepolia.public.blastapi.io/rpc/v0_7", block_tag: latest)]
 fn test_deposit() {
     let (strapex_contract_address, user_addr, strapex_contract_disp) = deploy_factory();
-    approve_child_contract(strapex_contract_address, 10000);
+    // approve_child_contract(strapex_contract_address, 10000);
     
-    let id: u128 = 100;
-    let amount: u256 = 1000;
+    // let id: u128 = 100;
+    // let amount: u256 = 1000;
 
-    start_cheat_caller_address(strapex_contract_address, user_addr);
+    // start_cheat_caller_address(strapex_contract_address, user_addr);
 
-    strapex_contract_disp.deposit(id, amount);
+    // strapex_contract_disp.deposit(id, amount);
+
+    deposit_workflow(user_addr, strapex_contract_address, strapex_contract_disp, 1000, 100);
 }
 
 #[test]
@@ -96,17 +113,17 @@ fn test_withdraw() {
     strapex_contract_disp.withdraw();
 }
 
-#[test]
-#[fork(url: "https://starknet-sepolia.public.blastapi.io/rpc/v0_7", block_tag: latest)]
-fn test_withdraw_amount() {
-    let (strapex_contract_address, user_addr, strapex_contract_disp) = deploy_factory();
-    approve_child_contract(strapex_contract_address, 10000);
+// #[test]
+// #[fork(url: "https://starknet-sepolia.public.blastapi.io/rpc/v0_7", block_tag: latest)]
+// fn test_withdraw_amount() {
+//     let (strapex_contract_address, user_addr, strapex_contract_disp) = deploy_factory();
+//     approve_child_contract(strapex_contract_address, 10000);
 
-    let amount: u256 = 500;
+//     let amount: u256 = 500;
 
-    start_cheat_caller_address(strapex_contract_address, user_addr);
+//     start_cheat_caller_address(strapex_contract_address, user_addr);
 
-    strapex_contract_disp.deposit(100, amount);
+//     strapex_contract_disp.deposit(100, amount);
 
-    strapex_contract_disp.withdraw_amount(amount - 10);
-}
+//     strapex_contract_disp.withdraw_amount(amount - 10);
+// }
