@@ -1,6 +1,21 @@
 use starknet::ContractAddress;
 
 #[starknet::interface]
+trait IERC20<TContractState> {
+    fn name(self: @TContractState) -> felt252;
+    fn symbol(self: @TContractState) -> felt252;
+    fn decimals(self: @TContractState) -> u8;
+    fn total_supply(self: @TContractState) -> u256;
+    fn balanceOf(self: @TContractState, account: ContractAddress) -> u256;
+    fn allowance(self: @TContractState, owner: ContractAddress, spender: ContractAddress) -> u256;
+    fn transfer(ref self: TContractState, recipient: ContractAddress, amount: u256) -> bool;
+    fn transferFrom(
+        ref self: TContractState, sender: ContractAddress, recipient: ContractAddress, amount: u256
+    ) -> bool;
+    fn approve(ref self: TContractState, spender: ContractAddress, amount: u256) -> bool;
+}
+
+#[starknet::interface]
 trait IStrapex<TContractState> {
     fn deposit(ref self: TContractState, id: u128, amount: u256);
     fn withdraw(ref self: TContractState);
@@ -16,7 +31,6 @@ trait IStrapex<TContractState> {
 
 #[starknet::contract]
 pub mod StrapexContract {
-    use starknet::storage::Map;
     use contract_strapex::strapex_contract::IStrapex;
     use core::traits::Into;
     use core::box::BoxTrait;
@@ -24,7 +38,8 @@ pub mod StrapexContract {
         get_caller_address, get_contract_address, ContractAddress, Zeroable, get_execution_info
     };
     use contract_strapex::ownership_component::ownable_component;
-    use openzeppelin::token::erc20::interface::{IERC20Dispatcher, IERC20DispatcherTrait};
+    use super::{IERC20Dispatcher, IERC20DispatcherTrait};
+    use starknet::storage::Map;
     component!(path: ownable_component, storage: ownable, event: OwnableEvent);
 
 
@@ -35,6 +50,7 @@ pub mod StrapexContract {
     #[storage]
     struct Storage {
         token: IERC20Dispatcher,
+        
         balance: u256,
         fee_percentage: u256,
         fees_collected: u256,
@@ -107,8 +123,8 @@ pub mod StrapexContract {
         _token: ContractAddress
     ) {
         assert(!_owner.is_zero(), Errors::Address_Zero_Owner);
-        self.token.write(IERC20Dispatcher { contract_address: _token });
         self.ownable.initializer(_owner);
+        self.token.write(super::IERC20Dispatcher { contract_address: _token });
         self.fee_percentage.write(50); // 0.5%
         self.manager.write(manager);
     }
@@ -118,7 +134,7 @@ pub mod StrapexContract {
         fn deposit(ref self: ContractState, id: u128, amount: u256) {
             let (caller, this, currentBalance) = self.getImportantAddresses();
 
-            self.token.read().transfer_from(caller, this, amount);
+            self.token.read().transferFrom(caller, this, amount.into());
 
             self.balance.write(currentBalance + amount);
 
@@ -158,7 +174,7 @@ pub mod StrapexContract {
             let owner = self.ownable.owner();
             assert(caller == owner, Errors::UnAuthorized_Caller);
 
-            let taxable_amount: u256 = self.taxable_amount.read();
+            let taxable_amount: u256    = self.taxable_amount.read();
             let fee_percentage = self.fee_percentage.read();
             let fee_amount = taxable_amount * fee_percentage / 100;
             let withdrawal_amount = self.balance.read() - fee_amount;
@@ -242,7 +258,7 @@ pub mod StrapexContract {
             // Optionally update fees collected
             let updated_fees_collected = self.fees_collected.read() + fee_amount;
             self.fees_collected.write(updated_fees_collected);
-            // Emit an event if necessary
+        // Emit an event if necessary
         }
 
         fn refund(ref self: ContractState, tx_hash: felt252) {
@@ -251,11 +267,11 @@ pub mod StrapexContract {
             assert(caller == owner, Errors::UnAuthorized_Caller);
 
             let (_, _, _) = self.getImportantAddresses();
-            let Payment { buyer, amount, token, id, refunded } = self.payments.read(tx_hash);
+            let Payment{buyer, amount, token, id, refunded } = self.payments.read(tx_hash);
             assert(refunded == 0.into(), Errors::Already_Refunded);
 
             // Generalized for future support of multi tokens
-            let tokenDispatch = IERC20Dispatcher { contract_address: token };
+            let tokenDispatch = super::IERC20Dispatcher { contract_address: token };
             tokenDispatch.transfer(buyer, amount.into());
 
             self.payments.write(tx_hash, Payment { buyer, amount, token, id, refunded: amount });
@@ -267,21 +283,14 @@ pub mod StrapexContract {
             assert(caller == owner, Errors::UnAuthorized_Caller);
 
             let (_, _, _) = self.getImportantAddresses();
-            let Payment { buyer, amount: total_amount, token, id, refunded } = self
-                .payments
-                .read(tx_hash);
+            let Payment{buyer, amount: total_amount, token, id, refunded } = self.payments.read(tx_hash);
             assert(refunded + amount <= total_amount, Errors::Refund_Exceeds_Amount);
 
             // Generalized for future support of multi tokens
-            let tokenDispatch = IERC20Dispatcher { contract_address: token };
+            let tokenDispatch = super::IERC20Dispatcher { contract_address: token };
             tokenDispatch.transfer(buyer, amount.into());
 
-            self
-                .payments
-                .write(
-                    tx_hash,
-                    Payment { buyer, amount: total_amount, token, id, refunded: refunded + amount }
-                );
+            self.payments.write(tx_hash, Payment { buyer, amount: total_amount, token, id, refunded: refunded + amount });
         }
 
         fn get_fee_percentage(self: @ContractState) -> u256 {
