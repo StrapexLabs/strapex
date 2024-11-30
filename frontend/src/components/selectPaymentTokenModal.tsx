@@ -5,8 +5,8 @@ import { formatSignificantDigits } from '@/utils/helpers'
 import { Quote } from '@avnu/avnu-sdk'
 import { ChevronRightIcon } from '@radix-ui/react-icons'
 import { Avatar, Box, Button, CheckboxCards, Dialog, Flex, Grid, Skeleton, Slider, Text } from '@radix-ui/themes'
-import { formatUnits } from 'ethers'
-import { Dispatch, SetStateAction, useState } from 'react'
+import { formatUnits, parseUnits } from 'ethers'
+import { Dispatch, SetStateAction, useState, useEffect, useMemo } from 'react'
 
 type Props = {
   sessionData: SessionData | null
@@ -40,21 +40,62 @@ const SelectPaymentTokenModal = ({
   priceInToken,
   quotesLoading,
 }: Props) => {
-  const [selectedTokens, setSelectedTokens] = useState<string[]>(tokensToPayWith?.map(t => t.tokenAddress))
+  const [selectedTokens, setSelectedTokens] = useState<string[]>(tokensToPayWith?.map(t => t.tokenAddress));
+  const [sliderValues, setSliderValues] = useState<number[]>([]);
+  const [tokenAmounts, setTokenAmounts] = useState<{ [key: string]: number }>({});
+
+  const totalPrice = useMemo(() => {
+    if (!priceInToken) return 0;
+    return Number(formatUnits(priceInToken.priceInBaseToken, priceInToken.baseTokenDecimals));
+  }, [priceInToken]);
+
+  useEffect(() => {
+    if (selectedTokens.length > 0) {
+      const initialValue = totalPrice / selectedTokens.length;
+      setSliderValues(selectedTokens.map(() => initialValue));
+    } else {
+      setSliderValues([]);
+    }
+  }, [selectedTokens, totalPrice]);
 
   const handleTokenSelection = (value: string[]) => {
-    setSelectedTokens(value)
+    setSelectedTokens(value);
   };
 
   const handleConfirm = () => {
     const newTokensToPayWith = selectedTokens.map(address => ({
       tokenAddress: address,
       quoteId: "",
-    }))
-    setTokensToPayWith(newTokensToPayWith)
-    fetchAndSetPrependedSwapCalls(selectedTokens)
-    setIsTokenSelectionOpen(false)
+      amount: tokenAmounts[address] || 0,
+    }));
+    setTokensToPayWith(newTokensToPayWith);
+    fetchAndSetPrependedSwapCalls(selectedTokens);
+    setIsTokenSelectionOpen(false);
   };
+
+  const handleSliderChange = (newValues: number[]) => {
+    setSliderValues(newValues);
+    updateTokenAmounts(newValues);
+  };
+
+  const updateTokenAmounts = (values: number[]) => {
+    if (!priceInToken) return;
+
+    const newTokenAmounts: { [key: string]: number } = {};
+
+    selectedTokens.forEach((tokenAddress, index) => {
+      const tokenAmount = values[index];
+      newTokenAmounts[tokenAddress] = tokenAmount;
+    });
+
+    setTokenAmounts(newTokenAmounts);
+  };
+
+  useEffect(() => {
+    updateTokenAmounts(sliderValues);
+  }, [priceInToken]);
+
+  const isConfirmDisabled = selectedTokens.length === 0 || sliderValues.reduce((a, b) => a + b, 0) !== totalPrice;
 
   return (
     <Dialog.Root open={isTokenSelectionOpen} onOpenChange={(isOpen) => setIsTokenSelectionOpen(isOpen)}>
@@ -100,7 +141,7 @@ const SelectPaymentTokenModal = ({
           {quotesLoading ? (
             <>
               <Box className='border rounded-[6px] p-2'>
-                <Flex direction="column" width="200px">
+                <Flex direction="column" width="100%">
                   <Text><Skeleton>Loading...</Skeleton></Text>
                   <Button variant="soft" color="gray"><Skeleton>Loading...</Skeleton></Button>
                 </Flex>
@@ -144,7 +185,9 @@ const SelectPaymentTokenModal = ({
               }
 
               return (
-                <CheckboxCards.Item key={index} value={token.address} className='pr-[14px] w-[209px] max-w-[209px] disabled:cursor-not-allowed' disabled={!isThereEnough}>
+                <CheckboxCards.Item key={index} value={token.address} className={`w-[209px] max-w-[209px] disabled:cursor-not-allowed border-2 transition-colors ${
+                    selectedTokens.includes(token.address) ? 'border-blue-500' : 'border-transparent'
+                  }`} disabled={!isThereEnough}>
                   <Flex direction="column" width="100%">
                     <Flex direction="row" align="center" gap="2" width="100%">
                       <Avatar size="3" src={token.image} fallback={ticker?.[0] || 'T'} />
@@ -175,8 +218,9 @@ const SelectPaymentTokenModal = ({
             <Flex justify="between" wrap="wrap" gap="2">
               {selectedTokens.map((tokenAddress, index) => {
                 const token = tokensList.find((t) => t.address === tokenAddress)
+                const amount = tokenAmounts[tokenAddress] || 0
                 return (
-                  <Box key={index} className=" h-[45px] px-2 py-1 bg-white rounded-[4px] border-[var(--accent)]">
+                  <Box key={index} className="h-[45px] px-2 py-1 bg-white rounded-[4px]">
                     <Flex gap="2" align="center">
                       <Avatar
                         size="1"
@@ -185,9 +229,9 @@ const SelectPaymentTokenModal = ({
                       />
                       <Box className='flex flex-col justify-center text-center gap-0'>
                         <Flex direction="column" justify="center" gap="0">
-                          <Text size="2">{token?.ticker}</Text>
+                          <Text size="2">0.001 {token?.ticker}</Text>
                           <Text className='text-[10px]' color="gray">
-                            ({token?.balance}) USD
+                            {amount.toFixed(4)} USD
                           </Text>
                         </Flex>
                       </Box>
@@ -196,7 +240,14 @@ const SelectPaymentTokenModal = ({
                 )
               })}
             </Flex>
-            <Slider defaultValue={[0]} className="mt-4" />
+            <Slider 
+              value={sliderValues} 
+              onValueChange={handleSliderChange} 
+              className="mt-4" 
+              step={0.01}
+              min={0}
+              max={totalPrice}
+            />
           </Box>
         )}
 
@@ -204,7 +255,15 @@ const SelectPaymentTokenModal = ({
           <Dialog.Close>
             <Button variant="soft">Cancel</Button>
           </Dialog.Close>
-          <Button style={{backgroundColor: "black"}} onClick={handleConfirm}>
+          <Button 
+            style={{
+              backgroundColor: isConfirmDisabled ? "#808080" : "black",
+              color: "white",
+              cursor: isConfirmDisabled ? "not-allowed" : "pointer",
+            }} 
+            onClick={handleConfirm}
+            disabled={isConfirmDisabled}
+          >
             Confirm
           </Button>
         </Flex>

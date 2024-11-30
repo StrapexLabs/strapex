@@ -6,7 +6,7 @@
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 214, 219, 220;
   --background-end-rgb: 255, 255, 255;
-  --accent: #1C91F;
+  --accent: #1C91FF;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -33,4 +33,8 @@ body {
 
 .rt-CheckboxCardsItem {
   padding-right: 16px !important;
+}
+
+.rt-Box.h-\[45px\].px-2.py-1.bg-white.rounded-\[4px\] {
+  outline: 1px solid var(--accent);
 }
