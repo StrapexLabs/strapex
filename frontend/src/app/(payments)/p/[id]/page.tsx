@@ -40,7 +40,7 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
   const [addressBalances, setAddressBalances] = useState<Balance[]>([]);
   const [sessionData, setSessionData] = useState<SessionData | null>(null);
   const [prependedSwapCalls, setPrependedSwapCalls] = useState<any[]>([]);
-  const [tokenToPayWith, setTokenToPayWith] = useState<TokenToPayWith | null>(null);
+  const [tokensToPayWith, setTokensToPayWith] = useState<TokenToPayWith[]>([]);
   const [qrContent, setQrContent] = useState<string | null>(null);
 
   {/* Provider */ }
@@ -446,56 +446,63 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
   }, [sessionData]);
 
   function fetchAndSetPrependedSwapCalls(
-    tokenAddress: string,
+    tokenAddresses: string[],
     slippage = 0.005,
     executeApprove = true,
     options = AVNU_OPTIONS
   ) {
     if (!account) {
-      alert("No account found");
-      return;
+      alert("No account found")
+      return
     }
 
     if (!priceInToken) {
-      alert("No price found");
-      return;
+      alert("No price found")
+      return
     }
 
-    console.log('Set coin to pay with:', tokenAddress, slippage, executeApprove, options)
+    console.log('Set coins to pay with:', tokenAddresses, slippage, executeApprove, options)
 
-    // If it's the base token dont do anything
-    const normalizedBaseTokenAddress = priceInToken?.baseTokenAddress.slice(-63).toUpperCase();
-    const normalizedTokenAddress = tokenAddress.slice(-63).toUpperCase();
+    const normalizedBaseTokenAddress = priceInToken?.baseTokenAddress.slice(-63).toUpperCase()
+    
+    const swapCalls: any[] = []
+    const newTokensToPayWith: TokenToPayWith[] = []
 
-    if (normalizedTokenAddress === normalizedBaseTokenAddress) {
-      setTokenToPayWith({
-        tokenAddress: priceInToken?.baseTokenAddress,
-        quoteId: "lmao",
-      });
-      setPrependedSwapCalls([]);
-      return;
-    }
+    tokenAddresses.forEach(tokenAddress => {
+      const normalizedTokenAddress = tokenAddress.slice(-63).toUpperCase()
 
+      if (normalizedTokenAddress === normalizedBaseTokenAddress) {
+        newTokensToPayWith.push({
+          tokenAddress: priceInToken.baseTokenAddress,
+          quoteId: "base_token",
+        })
+        return
+      }
 
-    const quote = quotes.find(q =>
-      q.sellTokenAddress.slice(-63).toUpperCase() === normalizedTokenAddress ||
-      q.buyTokenAddress.slice(-63).toUpperCase() === normalizedTokenAddress
-    );
-    if (!quote) {
-      alert("No quote found for the selected token");
-      return;
-    }
+      const quote = quotes.find(q =>
+        q.sellTokenAddress.slice(-63).toUpperCase() === normalizedTokenAddress ||
+        q.buyTokenAddress.slice(-63).toUpperCase() === normalizedTokenAddress
+      )
 
-    setTokenToPayWith({
-      tokenAddress: tokenAddress,
-      quoteId: quote.quoteId,
-    });
-    console.log("quoteId to build transaction", quote.quoteId);
-    fetchBuildExecuteTransaction(quote.quoteId, account.address, slippage, executeApprove, options).then((transaction) => {
-      console.log("Just selected a token, prepend calls", transaction.calls)
-      setPrependedSwapCalls(transaction.calls);
-    });
+      if (!quote) {
+        console.warn(`No quote found for token: ${tokenAddress}`)
+        return
+      }
+
+      newTokensToPayWith.push({
+        tokenAddress: tokenAddress,
+        quoteId: quote.quoteId,
+      })
+
+      fetchBuildExecuteTransaction(quote.quoteId, account.address, slippage, executeApprove, options).then((transaction) => {
+        swapCalls.push(...transaction.calls)
+        setPrependedSwapCalls(prevCalls => [...prevCalls, ...transaction.calls])
+      })
+    })
+
+    setTokensToPayWith(newTokensToPayWith)
   }
+
 
   function calculateQrContent() {
 
@@ -723,17 +730,18 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
                         </div>
 
                         {account ? (
-                          <SelectPaymentTokenModal    
-                              sessionData={sessionData}
-                              isTokenSelectionOpen={isTokenSelectionOpen}
-                              setIsTokenSelectionOpen={setIsTokenSelectionOpen}
-                              tokenToPayWith={tokenToPayWith}
-                              tokensList={tokensList}
-                              fetchAndSetPrependedSwapCalls={fetchAndSetPrependedSwapCalls}
-                              addressBalances={addressBalances}
-                              quotes={quotes}
-                              priceInToken={priceInToken}
-                              quotesLoading={quotesLoading}
+                          <SelectPaymentTokenModal
+                            sessionData={sessionData}
+                            isTokenSelectionOpen={isTokenSelectionOpen}
+                            setIsTokenSelectionOpen={setIsTokenSelectionOpen}
+                            tokensToPayWith={tokensToPayWith}
+                            setTokensToPayWith={setTokensToPayWith}
+                            tokensList={tokensList}
+                            fetchAndSetPrependedSwapCalls={fetchAndSetPrependedSwapCalls}
+                            addressBalances={addressBalances}
+                            quotes={quotes}
+                            priceInToken={priceInToken}
+                            quotesLoading={quotesLoading}
                           />
                         ) : (
                           <Button onClick={connectToStarknet} className="bg-neutral-800" size="3">
@@ -748,7 +756,7 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
                         className="min-w-full w-full text-white px-6 py-3 rounded font-semibold"
                         size="3"
                         color="blue"
-                        disabled={account === null || priceInToken === null || tokenToPayWith === null}
+                        disabled={account === null || priceInToken === null || tokensToPayWith?.length === 0 || tokensToPayWith === null}
                       >
                         Pay
                       </Button>
