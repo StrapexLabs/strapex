@@ -50,6 +50,7 @@ mod strapex_factory {
         HashUpdated: HashUpdated,
         AccountCreated: AccountCreated,
         DepositTokenUpdated: DepositTokenUpdated,
+        ErrorOccurred: ErrorOccurred,
     }
 
     #[derive(Drop, starknet::Event)]
@@ -82,8 +83,35 @@ mod strapex_factory {
         newToken: ContractAddress,
     }
 
+    #[derive(Drop, starknet::Event)]
+    struct ErrorOccurred {
+        #[key]
+        error_code: u8,
+        #[key]
+        function_name: felt252,
+    }
+
     mod Errors {
-        const Address_Zero_Owner: felt252 = 'Address cannot be zero own';
+        #[derive(Drop, PartialEq)]
+        enum FactoryError {
+            AddressZeroOwner: (),
+            UnAuthorizedCaller: (),
+            DeploymentFailed: (),
+            InvalidClassHash: (),
+            InvalidDepositToken: (),
+        }
+
+        impl ErrorIntoFelt252 of Into<FactoryError, felt252> {
+            fn into(self: FactoryError) -> felt252 {
+                match self {
+                    FactoryError::AddressZeroOwner => 'Address cannot be zero',
+                    FactoryError::UnAuthorizedCaller => 'Unauthorized caller',
+                    FactoryError::DeploymentFailed => 'Failed to deploy contract',
+                    FactoryError::InvalidClassHash => 'Invalid class hash',
+                    FactoryError::InvalidDepositToken => 'Invalid deposit token',
+                }
+            }
+        }
     }
 
     #[constructor]
@@ -94,6 +122,9 @@ mod strapex_factory {
         childHash: ClassHash,
         depositToken: ContractAddress
     ) {
+        assert(!owner.is_zero(), Errors::FactoryError::AddressZeroOwner.into());
+        assert(!childHash.is_zero(), Errors::FactoryError::InvalidClassHash.into());
+        assert(!depositToken.is_zero(), Errors::FactoryError::InvalidDepositToken.into());
         self.totalStrapexAccountsNo.write(0);
         self.strapexChildHash.write(childHash);
         self.depositToken.write(depositToken);
@@ -120,7 +151,7 @@ mod strapex_factory {
                 constructor_calldata.span(),
                 false
             )
-                .expect('failed to deploy contract');
+                .expect(Errors::FactoryError::DeploymentFailed.into());
 
             self.strapexChildOwner.write(get_caller_address(), deployed_address);
             self.totalStrapexAccountsNo.write(self.totalStrapexAccountsNo.read() + 1);
@@ -140,6 +171,7 @@ mod strapex_factory {
         fn updateStrapexChildHash(ref self: ContractState, newClassHash: ClassHash) {
             // Updates the class hash of the child Strapex contracts.
             self.ownable.assert_only_owner();
+            assert(!newClassHash.is_zero(), Errors::FactoryError::InvalidClassHash.into());
             let oldHash = self.strapexChildHash.read();
             self.strapexChildHash.write(newClassHash);
             self
@@ -153,6 +185,7 @@ mod strapex_factory {
         fn updateDepositToken(ref self: ContractState, newDepositToken: ContractAddress) {
             // Updates the deposit token of the contract.
             self.ownable.assert_only_owner();
+            assert(!newDepositToken.is_zero(), Errors::FactoryError::InvalidDepositToken.into());
             let oldToken = self.depositToken.read();
             self.depositToken.write(newDepositToken);
             self
@@ -172,7 +205,7 @@ mod strapex_factory {
             // Retrieves the Strapex account associated with a user address.
             self: @ContractState, userAddress: ContractAddress
         ) -> ContractAddress {
-            assert(!userAddress.is_zero(), Errors::Address_Zero_Owner);
+            assert(!userAddress.is_zero(), Errors::FactoryError::AddressZeroOwner.into());
             self.strapexChildOwner.read(userAddress)
         }
 
@@ -184,7 +217,7 @@ mod strapex_factory {
 
         fn get_childClassHash(self: @ContractState) -> ClassHash {
             let currentHash = self.strapexChildHash.read();
-            assert!(!currentHash.is_zero(), "Child class hash is zero");
+            assert(!currentHash.is_zero(), Errors::FactoryError::InvalidClassHash.into());
             currentHash
         }
     }
