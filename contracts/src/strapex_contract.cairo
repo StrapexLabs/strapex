@@ -30,7 +30,7 @@ trait IStrapex<TContractState> {
 }
 
 #[starknet::contract]
-mod strapex_contract {
+pub mod StrapexContract {
     use contract_strapex::strapex_contract::IStrapex;
     use core::traits::Into;
     use core::box::BoxTrait;
@@ -75,7 +75,7 @@ mod strapex_contract {
 
     #[event]
     #[derive(Drop, starknet::Event)]
-    enum Event {
+    pub enum Event {
         OwnableEvent: ownable_component::Event,
         Deposit: Deposit,
         Withdraw: Withdraw,
@@ -83,7 +83,7 @@ mod strapex_contract {
     }
 
     #[derive(Drop, starknet::Event)]
-    struct Deposit {
+    pub struct Deposit {
         #[key]
         from: ContractAddress,
         #[key]
@@ -94,13 +94,13 @@ mod strapex_contract {
     }
 
     #[derive(Drop, starknet::Event)]
-    struct Withdraw {
+    pub struct Withdraw {
         #[key]
         Amount: u256,
     }
 
     #[derive(Drop, starknet::Event)]
-    struct FeeCollection {
+    pub struct FeeCollection {
         #[key]
         Amount: u256,
     }
