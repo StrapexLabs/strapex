@@ -14,6 +14,20 @@ This guide will walk you through the deployment process for the `Strapex` contra
 - **Factory Contract Address**: `0x03e171d9c4b93dde9a2b2c6658b56dc2b1bf43aad105e7685cb9974f01e13117`
 - **Starkli Wallet Path**: `~/.starkli-wallets/deployer/`
 
+## Linting
+Make sure to use the following command to lint all Cairo files before raising a PR
+
+#### Lint all Cairo failes
+```bash
+scarb fmt
+```
+
+To check if all files are linted, run the following command. If there are any linting errors, it will be displayed in the terminal.
+
+#### Check for linting errors
+```bash
+scarb fmt --check
+```
 
 ### 0. Set your wallet locally
 Please refer to the [Starknet documentation](https://docs.starknet.io/quick-start/set-up-an-account/#creating_a_keystore_file) to create a keystore file.
