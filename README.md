@@ -46,15 +46,22 @@ For more detailed guidelines, please refer to the [Git Style Guide](https://udac
 <table>
   <tbody>
     <tr>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/machuwey"><img src="https://avatars.githubusercontent.com/u/56169780?v=4&s=100" width="100px;" alt="Machuwey"/><br /><sub><b>Machuwey</b></sub></a><br /><a href="https://github.com/The Starknet Community/The Starknet Book/commits?author=omarespejel" title="Code">💻</a> <a href="https://github.com/The Starknet Community/The Starknet Book/commits?author=omarespejel" title="Documentation">📖</a></td>
-    <tr>
-</tbody> 
-</table>
-
-<table>
-  <tbody>
-    <tr>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/SoarinSkySagar"><img src="https://avatars.githubusercontent.com/u/117727361?v=4&s=100" width="100px;" alt="SoarinSkySagar"/><br /><sub><b>SoarinSkySagar</b></sub></a><br /><a href="https://github.com/The Starknet Community/The Starknet Book/commits?author=omarespejel" title="Code">💻</a> <a href="https://github.com/The Starknet Community/The Starknet Book/commits?author=omarespejel" title="Documentation">📖</a></td>
-    <tr>
-</tbody> 
+      <td align="center" valign="top" width="14.28%">
+        <a href="https://github.com/machuwey">
+          <img src="https://avatars.githubusercontent.com/u/56169780?v=4&s=100" width="100px;" alt="Machuwey"/><br />
+          <sub><b>Machuwey</b></sub>
+        </a><br />
+        <a href="https://github.com/The Starknet Community/The Starknet Book/commits?author=omarespejel" title="Code">💻</a>
+        <a href="https://github.com/The Starknet Community/The Starknet Book/commits?author=omarespejel" title="Documentation">📖</a>
+      </td>
+      <td align="center" valign="top" width="14.28%">
+        <a href="https://github.com/SoarinSkySagar">
+          <img src="https://avatars.githubusercontent.com/u/117727361?v=4&s=100" width="100px;" alt="SoarinSkySagar"/><br />
+          <sub><b>SoarinSkySagar</b></sub>
+        </a><br />
+        <a href="https://github.com/The Starknet Community/The Starknet Book/commits?author=omarespejel" title="Code">💻</a>
+        <a href="https://github.com/The Starknet Community/The Starknet Book/commits?author=omarespejel" title="Documentation">📖</a>
+      </td>
+    </tr>
+  </tbody>
 </table>
