@@ -17,7 +17,7 @@ This guide will walk you through the deployment process for the `Strapex` contra
 ## Linting
 Make sure to use the following command to lint all Cairo files before raising a PR
 
-#### Lint all Cairo failes
+#### Lint all Cairo files
 ```bash
 scarb fmt
 ```
