@@ -21,7 +21,7 @@ export async function GET(req: NextRequest) {
     if (sessionId === 'test') {
         const mockSession: SessionData = {
             sessionId: 'test',
-            totalPrice: 10,
+            totalPrice: 100,
             totalPriceToken: 'STRK',
             payment_type: 'onetime',
             successUrl: 'https://example.com/success',
@@ -31,7 +31,7 @@ export async function GET(req: NextRequest) {
                 {
                     id: 'item1',
                     name: 'Mock Product',
-                    price: 5,
+                    price: 50,
                     currency: 'STRK',
                     quantity: 2,
                 }

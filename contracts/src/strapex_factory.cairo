@@ -15,7 +15,7 @@ trait IStrapexFactory<TContractState> {
 }
 
 #[starknet::contract]
-mod strapex_factory {
+mod StrapexFactory {
     use core::traits::Into;
     use core::array::ArrayTrait;
     // Core StarkNet and contract utilities.
@@ -26,6 +26,7 @@ mod strapex_factory {
     use core::starknet::event::EventEmitter;
     use contract_strapex::ownership_component::IOwnable;
     use contract_strapex::ownership_component::ownable_component;
+    use starknet::storage::Map;
     component!(path: ownable_component, storage: ownable, event: OwnableEvent);
 
     #[abi(embed_v0)]
@@ -35,7 +36,7 @@ mod strapex_factory {
     #[storage]
     struct Storage {
         strapexChildHash: ClassHash,
-        strapexChildOwner: LegacyMap<ContractAddress, ContractAddress>,
+        strapexChildOwner: Map<ContractAddress, ContractAddress>,
         totalStrapexAccountsNo: u128,
         depositToken: ContractAddress,
         #[substorage(v0)]
