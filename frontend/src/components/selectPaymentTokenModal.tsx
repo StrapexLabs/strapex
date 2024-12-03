@@ -138,6 +138,8 @@ const SelectPaymentTokenModal = ({
       const sellAmount = quoteForToken.sellAmount || BigInt(0);
       formattedAmount = formatSignificantDigits(formatUnits(sellAmount, token.decimals));
       amountInUsd = quoteForToken.sellAmountInUsd || 0;
+      const tokenPrice = quoteForToken?.sellAmountInUsd ? quoteForToken.sellAmountInUsd / Number(formatUnits(quoteForToken.sellAmount, token?.decimals || 18)) : 0;
+      amountInUsd = balance?.balance && tokenPrice ? balance.balance * tokenPrice : 0;
       ticker = token.ticker;
       isThereEnough = (balance?.balance || 0) * 10 ** token.decimals >= sellAmount;
     }
@@ -218,7 +220,7 @@ const SelectPaymentTokenModal = ({
                   <Box>
                     <Flex justify="center" direction="column">
                       <Text size="2">{formattedAmount} {token?.ticker}</Text>
-                      <Text size="1" color="gray">({amountInUsd.toFixed(2)} USD)</Text>
+                      <Text size="1" color="gray">({Number(amountInUsd).toFixed(2)} USD)</Text>
                     </Flex>
                   </Box>
                   {index < tokensToPayWith.length - 1 && <Text className='mr-1'>+</Text>}
@@ -273,37 +275,35 @@ const SelectPaymentTokenModal = ({
               if (token.address === priceInToken?.baseTokenAddress) {
                 const baseTokenAmount = formatUnits(priceInToken?.priceInBaseToken || 0, priceInToken?.baseTokenDecimals || 18);
                 formattedAmount = formatSignificantDigits(baseTokenAmount);
-                // amountInUsd = formatUnits(priceInToken?.priceInUSDC || 0, 6);
+                amountInUsd = formatUnits(priceInToken?.priceInUSDC || 0, 6);
                 ticker = priceInToken?.baseTokenTicker;
               } else {
                 const quoteForToken = quotes.find(
                   (quote) => quote.sellTokenAddress.slice(-63).toUpperCase() === normalizedTokenAddress
                 );
                 if (!quoteForToken) return null;
-
-                const sellAmount = quoteForToken.sellAmount || BigInt(0);
-                formattedAmount = formatSignificantDigits(formatUnits(sellAmount, token.decimals));
-                amountInUsd = quoteForToken.sellAmountInUsd || 0;
+                const tokenPrice = quoteForToken?.sellAmountInUsd ? quoteForToken.sellAmountInUsd / Number(formatUnits(quoteForToken.sellAmount, token?.decimals || 18)) : 0;
+                amountInUsd = balance?.balance && tokenPrice ? balance.balance * tokenPrice : 0;
                 ticker = token.ticker;
               }
 
               return (
-                <Card key={index} className="w-[209px] max-w-[209px] border-2 border-transparent">
+                <Card key={index} className="w-[209px] cursor-not-allowed max-w-[209px] border-2 border-transparent">
                   <Flex direction="column" align="center" width="100%">
                     <Flex direction="row" align="center" gap="2" width="100%">
                       <Avatar size="3" src={token.image} fallback={ticker?.[0] || 'T'} />
                       <Flex direction="column" align="center" justify="center">
                         <Text size="5">
-                          {balance ? balance.balance : '0'} {ticker}
+                          {balance ? balance.balance.toFixed(3) : '0'} {ticker}
                         </Text>
                         <Text size="2" color="gray">
-                          0 USD
+                          ({Number(amountInUsd)?.toFixed(2) || 0} USD)
                         </Text>
                       </Flex>
                     </Flex>
-                    {/* <Text size="1" color="red" mt="2">
+                    <Text size="1" className="text-[12px]" color="red" mt="2">
                       Not Enough Balance
-                    </Text> */}
+                    </Text>
                   </Flex>
                 </Card>
               );
