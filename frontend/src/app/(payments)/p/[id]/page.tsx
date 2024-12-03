@@ -756,7 +756,7 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
                         className="min-w-full w-full text-white px-6 py-3 rounded font-semibold"
                         size="3"
                         color="blue"
-                        disabled={account === null || priceInToken === null || tokensToPayWith?.length === 0 || tokensToPayWith === null}
+                        disabled={account === null || priceInToken === null || tokensToPayWith?.length === 0 || tokensToPayWith === null || isTokenSelectionOpen }
                       >
                         Pay
                       </Button>
