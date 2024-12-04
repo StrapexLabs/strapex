@@ -446,7 +446,7 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
   }, [sessionData]);
 
   function fetchAndSetPrependedSwapCalls(
-    tokenAddresses: string[],
+    tokensToPayWith: TokenToPayWith[],
     slippage = 0.005,
     executeApprove = true,
     options = AVNU_OPTIONS
@@ -461,21 +461,21 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
       return
     }
 
-    console.log('Set coins to pay with:', tokenAddresses, slippage, executeApprove, options)
+    console.log('Set coins to pay with:', tokensToPayWith, slippage, executeApprove, options)
 
     const normalizedBaseTokenAddress = priceInToken?.baseTokenAddress.slice(-63).toUpperCase()
     
     const swapCalls: any[] = []
     const newTokensToPayWith: TokenToPayWith[] = []
 
-    tokenAddresses.forEach(tokenAddress => {
-      const normalizedTokenAddress = tokenAddress.slice(-63).toUpperCase()
+    tokensToPayWith.forEach(tokenToPayWith => {
+      const normalizedTokenAddress = tokenToPayWith?.tokenAddress.slice(-63).toUpperCase()
 
       if (normalizedTokenAddress === normalizedBaseTokenAddress) {
         newTokensToPayWith.push({
           tokenAddress: priceInToken.baseTokenAddress,
           quoteId: "base_token",
-          amount: 0,
+          amount: tokenToPayWith?.amount || 0,
         })
         return
       }
@@ -486,14 +486,14 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
       )
 
       if (!quote) {
-        console.warn(`No quote found for token: ${tokenAddress}`)
+        console.warn(`No quote found for token: ${tokenToPayWith.tokenAddress}`)
         return
       }
 
       newTokensToPayWith.push({
-        tokenAddress: tokenAddress,
+        tokenAddress: tokenToPayWith.tokenAddress,
         quoteId: quote.quoteId,
-        amount: 0,
+        amount: tokenToPayWith?.amount || 0,
       })
 
       fetchBuildExecuteTransaction(quote.quoteId, account.address, slippage, executeApprove, options).then((transaction) => {
@@ -501,7 +501,6 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
         setPrependedSwapCalls(prevCalls => [...prevCalls, ...transaction.calls])
       })
     })
-
     setTokensToPayWith(newTokensToPayWith)
   }
 

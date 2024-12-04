@@ -16,7 +16,7 @@ type Props = {
   setTokensToPayWith: Dispatch<SetStateAction<TokenToPayWith[]>>
   tokensList: Token[]
   fetchAndSetPrependedSwapCalls: (
-    tokenAddresses: string[],
+    tokensToPayWith: TokenToPayWith[],
     slippage?: number,
     executeApprove?: boolean,
     options?: typeof AVNU_OPTIONS,
@@ -84,7 +84,7 @@ const SelectPaymentTokenModal = ({
     });
     
     setTokensToPayWith(newTokensToPayWith);
-    fetchAndSetPrependedSwapCalls(selectedTokens);
+    fetchAndSetPrependedSwapCalls(newTokensToPayWith);
     setIsTokenSelectionOpen(false);
   };
 
@@ -208,6 +208,7 @@ const SelectPaymentTokenModal = ({
         ) : (
           <button className="flex flex-row items-center border border-gray-200 p-2 rounded flex-wrap max-w-[250px] justify-start gap-y-[6px]">
             {tokensToPayWith.map((tokenToPayWith, index) => {
+              if(tokenToPayWith.amount === 0) return;
               const tokenAddress = tokenToPayWith?.tokenAddress;
               const token = tokensList.find((t) => t.address === tokenAddress);
               const tokenAmount = tokenToPayWith?.amount || 0;
@@ -217,13 +218,13 @@ const SelectPaymentTokenModal = ({
                 const formattedAmount = formatSignificantDigits(baseTokenAmount);
                 const sellAmountInUsd = formatUnits(priceInToken?.priceInUSDC || 0, 6);
                 tokenPrice = Number(sellAmountInUsd) / Number(formattedAmount);
-                amountInUsd = tokenAmount && tokenPrice?  tokenAmount * tokenPrice : 0;
+                amountInUsd = tokenAmount && tokenPrice?  tokenAmount / tokenPrice : 0;
               } else {
                 const quote = quotes.find(
                   q => q.sellTokenAddress.slice(-63).toUpperCase() === tokenAddress.slice(-63).toUpperCase()
                 );
                 tokenPrice = quote?.sellAmountInUsd ? quote.sellAmountInUsd / Number(formatUnits(quote.sellAmount, token?.decimals || 18)) : 0;
-                amountInUsd = tokenAmount && tokenPrice?  tokenAmount * tokenPrice : 0;
+                amountInUsd = tokenAmount && tokenPrice?  tokenAmount / tokenPrice : 0;
               }
 
 
@@ -232,8 +233,8 @@ const SelectPaymentTokenModal = ({
                   <Avatar size="1" src={token?.image} fallback={token?.ticker?.[0] || 'T'} />
                   <Box>
                     <Flex justify="center" direction="column">
-                      <Text size="2">{tokenAmount?.toFixed(3)} {token?.ticker}</Text>
-                      <Text size="1" color="gray">({Number(amountInUsd).toFixed(2)} USD)</Text>
+                      <Text size="2">{Number(amountInUsd).toFixed(3)} {token?.ticker}</Text>
+                      <Text size="1" color="gray">({tokenAmount?.toFixed(2)} USD)</Text>
                     </Flex>
                   </Box>
                   {index < tokensToPayWith.length - 1 && <Text className='mr-1'>+</Text>}
@@ -309,7 +310,7 @@ const SelectPaymentTokenModal = ({
               }
 
               return (
-                <Card key={index} className="w-[209px] cursor-not-allowed max-w-[209px] border-2 border-transparent">
+                <Card key={index} className=" w-full lg:w-[209px] cursor-not-allowed max-w-[209px] border-2 border-transparent">
                   <Flex direction="column" align="center" width="100%">
                     <Flex direction="row" align="center" gap="2" width="100%">
                       <Avatar size="3" src={token.image} fallback={ticker?.[0] || 'T'} />
