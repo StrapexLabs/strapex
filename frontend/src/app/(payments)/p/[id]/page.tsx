@@ -475,6 +475,7 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
         newTokensToPayWith.push({
           tokenAddress: priceInToken.baseTokenAddress,
           quoteId: "base_token",
+          amount: 0,
         })
         return
       }
@@ -492,6 +493,7 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
       newTokensToPayWith.push({
         tokenAddress: tokenAddress,
         quoteId: quote.quoteId,
+        amount: 0,
       })
 
       fetchBuildExecuteTransaction(quote.quoteId, account.address, slippage, executeApprove, options).then((transaction) => {

@@ -76,6 +76,7 @@ export type TokenToPayWith = {
     slippage?: number;
     executeApprove?: boolean;
     options?: any;
+    amount: number;
   };
   
 export type TotalPrice = {

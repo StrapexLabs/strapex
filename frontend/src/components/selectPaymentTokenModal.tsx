@@ -121,12 +121,14 @@ const SelectPaymentTokenModal = ({
   const renderTokenCard = (token: Token, balance: Balance | undefined, index: number) => {
     const normalizedTokenAddress = token.address.slice(-63).toUpperCase();
     let isThereEnough = false;
-    let formattedAmount, amountInUsd, ticker;
+    let formattedAmount, sellAmountInUsd, tokenPrice, amountInUsd, ticker;
 
     if (token.address === priceInToken?.baseTokenAddress) {
       const baseTokenAmount = formatUnits(priceInToken?.priceInBaseToken || 0, priceInToken?.baseTokenDecimals || 18);
       formattedAmount = formatSignificantDigits(baseTokenAmount);
-      amountInUsd = formatUnits(priceInToken?.priceInUSDC || 0, 6);
+      sellAmountInUsd = formatUnits(priceInToken?.priceInUSDC || 0, 6);
+      tokenPrice = Number(sellAmountInUsd) / Number(formattedAmount);
+      amountInUsd = balance && tokenPrice ? balance?.balance * tokenPrice : 0;
       ticker = priceInToken?.baseTokenTicker;
       isThereEnough = (balance?.balance || 0) * 10 ** token.decimals >= priceInToken?.priceInBaseToken;
     } else {
@@ -138,7 +140,7 @@ const SelectPaymentTokenModal = ({
       const sellAmount = quoteForToken.sellAmount || BigInt(0);
       formattedAmount = formatSignificantDigits(formatUnits(sellAmount, token.decimals));
       amountInUsd = quoteForToken.sellAmountInUsd || 0;
-      const tokenPrice = quoteForToken?.sellAmountInUsd ? quoteForToken.sellAmountInUsd / Number(formatUnits(quoteForToken.sellAmount, token?.decimals || 18)) : 0;
+      tokenPrice = quoteForToken?.sellAmountInUsd ? quoteForToken.sellAmountInUsd / Number(formatUnits(quoteForToken.sellAmount, token?.decimals || 18)) : 0;
       amountInUsd = balance?.balance && tokenPrice ? balance.balance * tokenPrice : 0;
       ticker = token.ticker;
       isThereEnough = (balance?.balance || 0) * 10 ** token.decimals >= sellAmount;
@@ -164,7 +166,7 @@ const SelectPaymentTokenModal = ({
       <CheckboxCards.Item 
         key={index} 
         value={token.address} 
-        className={`w-[209px] max-w-[209px] disabled:cursor-not-allowed border-2 transition-colors ${
+        className={`w-[209px] max-w-[209px] disabled:cursor-not-allowed cursor-pointer border-2 transition-colors ${
           selectedTokens.includes(token.address) ? 'border-blue-500' : 'border-transparent'
         }`} 
         disabled={!isThereEnough}
@@ -204,22 +206,33 @@ const SelectPaymentTokenModal = ({
         {tokensToPayWith.length === 0 ? (
           <Button className="bg-neutral-800 mb-5">Select Payment Token</Button>
         ) : (
-          <button className="flex flex-row items-center border border-gray-200 p-2 rounded">
+          <button className="flex flex-row items-center border border-gray-200 p-2 rounded flex-wrap max-w-[250px] justify-start gap-y-[6px]">
             {tokensToPayWith.map((tokenToPayWith, index) => {
-              const token = tokensList.find((t) => t.address === tokenToPayWith.tokenAddress);
-              const quote = quotes.find(
-                (q) => q.sellTokenAddress.slice(-63).toUpperCase() === token?.address.slice(-63).toUpperCase()
-              )
-              const amount = quote ? formatUnits(quote.sellAmount, token?.decimals) : '0';
-              const formattedAmount = formatSignificantDigits(amount);
-              const amountInUsd = quote ? quote.sellAmountInUsd : 0;
+              const tokenAddress = tokenToPayWith?.tokenAddress;
+              const token = tokensList.find((t) => t.address === tokenAddress);
+              const tokenAmount = tokenToPayWith?.amount || 0;
+              let amountInUsd, tokenPrice;
+              if (token?.address === priceInToken?.baseTokenAddress) { 
+                const baseTokenAmount = formatUnits(priceInToken?.priceInBaseToken || 0, priceInToken?.baseTokenDecimals || 18);
+                const formattedAmount = formatSignificantDigits(baseTokenAmount);
+                const sellAmountInUsd = formatUnits(priceInToken?.priceInUSDC || 0, 6);
+                tokenPrice = Number(sellAmountInUsd) / Number(formattedAmount);
+                amountInUsd = tokenAmount && tokenPrice?  tokenAmount * tokenPrice : 0;
+              } else {
+                const quote = quotes.find(
+                  q => q.sellTokenAddress.slice(-63).toUpperCase() === tokenAddress.slice(-63).toUpperCase()
+                );
+                tokenPrice = quote?.sellAmountInUsd ? quote.sellAmountInUsd / Number(formatUnits(quote.sellAmount, token?.decimals || 18)) : 0;
+                amountInUsd = tokenAmount && tokenPrice?  tokenAmount * tokenPrice : 0;
+              }
+
 
               return (
-                <Flex key={index} align="center" gap="2">
+                <Flex key={index} align="center" gap="1">
                   <Avatar size="1" src={token?.image} fallback={token?.ticker?.[0] || 'T'} />
                   <Box>
                     <Flex justify="center" direction="column">
-                      <Text size="2">{formattedAmount} {token?.ticker}</Text>
+                      <Text size="2">{tokenAmount?.toFixed(3)} {token?.ticker}</Text>
                       <Text size="1" color="gray">({Number(amountInUsd).toFixed(2)} USD)</Text>
                     </Flex>
                   </Box>
@@ -227,7 +240,7 @@ const SelectPaymentTokenModal = ({
                 </Flex>
               )
             })}
-            <ChevronRightIcon className="w-4 h-4 ml-2" />
+            <ChevronRightIcon className="w-4 h-4" />
           </button>
         )}
       </Dialog.Trigger>
@@ -237,15 +250,21 @@ const SelectPaymentTokenModal = ({
         {quotesLoading ? (
           <Grid columns="2" gapX="10px" gapY="4px" width="100%">
             <Box className='border rounded-[6px] p-2'>
-              <Flex direction="column" width="100%">
-                <Text><Skeleton>Loading...</Skeleton></Text>
-                <Button variant="soft" color="gray"><Skeleton>Loading...</Skeleton></Button>
+              <Flex direction="row" gapX="8px" align="center">
+                <Skeleton><Avatar fallback="T" radius='full' size="3" /></Skeleton>
+                <Flex direction="column" justify="center" width="100%">
+                  <Button variant="soft" color="gray"><Skeleton>Loading...</Skeleton></Button>
+                  <Text><Skeleton>Loading...</Skeleton></Text>
+                </Flex>
               </Flex>
             </Box>
             <Box className='border rounded-[6px] p-2'>
-              <Flex direction="column" width="200px">
-                <Text><Skeleton> Loading...</Skeleton></Text>
-                <Button variant="soft" color="gray"><Skeleton> Loading... </Skeleton></Button>
+              <Flex direction="row" gapX="8px" align="center">
+                <Skeleton><Avatar fallback="T" radius='full' size="3" /></Skeleton>
+                <Flex direction="column" justify="center" width="100%">
+                  <Button variant="soft" color="gray"><Skeleton>Loading...</Skeleton></Button>
+                  <Text><Skeleton>Loading...</Skeleton></Text>
+                </Flex>
               </Flex>
             </Box>
           </Grid>
@@ -270,19 +289,21 @@ const SelectPaymentTokenModal = ({
                 (balance) => balance.address.slice(-63).toUpperCase() === token.address.slice(-63).toUpperCase()
               );
               const normalizedTokenAddress = token.address.slice(-63).toUpperCase();
-              let formattedAmount, amountInUsd, ticker;
+              let formattedAmount, tokenPrice, sellAmountInUsd, amountInUsd, ticker;
 
               if (token.address === priceInToken?.baseTokenAddress) {
                 const baseTokenAmount = formatUnits(priceInToken?.priceInBaseToken || 0, priceInToken?.baseTokenDecimals || 18);
                 formattedAmount = formatSignificantDigits(baseTokenAmount);
-                amountInUsd = formatUnits(priceInToken?.priceInUSDC || 0, 6);
+                sellAmountInUsd = formatUnits(priceInToken?.priceInUSDC || 0, 6);
+                tokenPrice = Number(sellAmountInUsd) / Number(formattedAmount);
+                amountInUsd = balance? balance?.balance * tokenPrice : 0;
                 ticker = priceInToken?.baseTokenTicker;
               } else {
                 const quoteForToken = quotes.find(
                   (quote) => quote.sellTokenAddress.slice(-63).toUpperCase() === normalizedTokenAddress
                 );
                 if (!quoteForToken) return null;
-                const tokenPrice = quoteForToken?.sellAmountInUsd ? quoteForToken.sellAmountInUsd / Number(formatUnits(quoteForToken.sellAmount, token?.decimals || 18)) : 0;
+                tokenPrice = quoteForToken?.sellAmountInUsd ? quoteForToken.sellAmountInUsd / Number(formatUnits(quoteForToken.sellAmount, token?.decimals || 18)) : 0;
                 amountInUsd = balance?.balance && tokenPrice ? balance.balance * tokenPrice : 0;
                 ticker = token.ticker;
               }
@@ -315,13 +336,22 @@ const SelectPaymentTokenModal = ({
           <Box width="100%" className='bg-zinc-100 rounded p-4' mt="8">
             <Flex justify="between" wrap="wrap" gap="2">
               {selectedTokens.map((tokenAddress, index) => {
-                const token = tokensList.find((t) => t.address === tokenAddress)
-                const quote = quotes.find(
-                  q => q.sellTokenAddress.slice(-63).toUpperCase() === tokenAddress.slice(-63).toUpperCase()
-                );
-                const usdAmount = tokenAmounts[tokenAddress] || 0;
-                const tokenPrice = quote?.sellAmountInUsd ? quote.sellAmountInUsd / Number(formatUnits(quote.sellAmount, token?.decimals || 18)) : 0;
-                const tokenAmount = tokenPrice ? usdAmount / tokenPrice : 0;
+                const token = tokensList.find((t) => t.address === tokenAddress);
+                let amountInUsd, tokenPrice, tokenAmount;
+                amountInUsd = tokenAmounts[tokenAddress] || 0;
+                if (token?.address === priceInToken?.baseTokenAddress) { 
+                  const baseTokenAmount = formatUnits(priceInToken?.priceInBaseToken || 0, priceInToken?.baseTokenDecimals || 18);
+                  const formattedAmount = formatSignificantDigits(baseTokenAmount);
+                  const sellAmountInUsd = formatUnits(priceInToken?.priceInUSDC || 0, 6);
+                  tokenPrice = Number(sellAmountInUsd) / Number(formattedAmount);
+                  tokenAmount = tokenPrice ? amountInUsd / tokenPrice : 0;
+                } else {
+                  const quote = quotes.find(
+                    q => q.sellTokenAddress.slice(-63).toUpperCase() === tokenAddress.slice(-63).toUpperCase()
+                  );
+                  tokenPrice = quote?.sellAmountInUsd ? quote.sellAmountInUsd / Number(formatUnits(quote.sellAmount, token?.decimals || 18)) : 0;
+                  tokenAmount = tokenPrice ? amountInUsd / tokenPrice : 0;
+                }
 
                 return (
                   <Box key={index} className="h-[45px] px-2 py-1 bg-white rounded-[4px]">
@@ -333,9 +363,9 @@ const SelectPaymentTokenModal = ({
                       />
                       <Box className='flex flex-col justify-center text-center gap-0'>
                         <Flex direction="column" justify="center" gap="0">
-                          <Text size="2">{tokenAmount.toFixed(4)} {token?.ticker}</Text>
+                          <Text size="2">{tokenAmount?.toFixed(4)} {token?.ticker}</Text>
                           <Text className='text-[10px]' color="gray">
-                            (${usdAmount.toFixed(2)})
+                            (${amountInUsd.toFixed(2)})
                           </Text>
                         </Flex>
                       </Box>
