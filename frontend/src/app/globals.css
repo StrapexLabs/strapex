@@ -6,6 +6,7 @@
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 214, 219, 220;
   --background-end-rgb: 255, 255, 255;
+  --accent: #1C91FF;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -19,4 +20,42 @@
 body {
   color: rgb(var(--foreground-rgb));
   
+}
+
+.radix-themes {
+	--blue: #3052f6;
+}
+
+/* Hide the default checkmark */
+.checkout-checkbox-root .rt-CheckboxCardCheckbox{
+  display: none !important;
+}
+.checkout-checkbox.rt-CheckboxCardsItem[data-state="checked"] {
+  outline: 1px solid var(--accent) !important;
+}
+
+.checkout-checkbox.rt-CheckboxCardsItem {
+  padding-right: 16px !important;
+}
+
+.rt-Box.h-\[45px\].px-2.py-1.bg-white.rounded-\[4px\] {
+  outline: 1px solid var(--accent);
+}
+
+.checkout-slider span.rt-SliderTrack {
+  background-color: #9E78FF;
+  box-shadow: none;
+  height: 10px;
+}
+.checkout-slider span.rt-SliderTrack + span{
+  border: 3px solid black;
+  border-radius: 2000px;
+}
+
+.checkout-slider.rt-SliderRoot:where(.rt-variant-surface) :where(.rt-SliderRange) {
+  background: none;
+  background-color: #2D15FF;
+}
+label.rt-BaseCard.rt-CheckboxCardsItem.checkout-checkbox.w-\[209px\].max-w-\[209px\].disabled\:cursor-not-allowed.cursor-pointer.border-2.transition-colors.border-blue-500{
+  cursor: pointer;
 }
