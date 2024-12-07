@@ -5,7 +5,7 @@ import { formatSignificantDigits } from '@/utils/helpers'
 import { Quote } from '@avnu/avnu-sdk'
 import { ChevronRightIcon } from '@radix-ui/react-icons'
 import { Avatar, Box, Button, CheckboxCards, Dialog, Flex, Grid, Skeleton, Slider, Text, Card } from '@radix-ui/themes'
-import { formatUnits, parseUnits } from 'ethers'
+import { formatUnits } from 'ethers'
 import { Dispatch, SetStateAction, useState, useEffect, useMemo } from 'react'
 
 type Props = {
@@ -43,11 +43,17 @@ const SelectPaymentTokenModal = ({
   const [selectedTokens, setSelectedTokens] = useState<string[]>(tokensToPayWith?.map(t => t.tokenAddress));
   const [sliderValues, setSliderValues] = useState<number[]>([]);
   const [tokenAmounts, setTokenAmounts] = useState<{ [key: string]: number }>({});
-
+  const [tokenLimitError, setTokenLimitError] = useState(false);
+  
   const totalPriceUSD = useMemo(() => {
     if (!priceInToken) return 0;
     return Number(formatUnits(priceInToken.priceInUSDC, 6));
   }, [priceInToken]);
+ 
+  const sliderStep = useMemo(() => {
+    if (!totalPriceUSD || selectedTokens.length <= 1) return 0.01;
+    return totalPriceUSD / 100; 
+  }, [totalPriceUSD, selectedTokens.length]);
 
   useEffect(() => {
     if (selectedTokens.length > 0) {
@@ -66,12 +72,19 @@ const SelectPaymentTokenModal = ({
   }, [selectedTokens, totalPriceUSD]);
 
   const handleTokenSelection = (value: string[]) => {
+    if(value.length > 2) {
+      setTokenLimitError(true);
+
+      setTimeout(() => {
+        setTokenLimitError(false);
+      }, 3000);
+      return;
+    }
     setSelectedTokens(value);
   };
 
   const handleConfirm = () => {
     const newTokensToPayWith = selectedTokens.map(address => {
-      const token = tokensList.find(t => t.address === address);
       const quote = quotes.find(
         q => q.sellTokenAddress.slice(-63).toUpperCase() === address.slice(-63).toUpperCase()
       );
@@ -88,18 +101,24 @@ const SelectPaymentTokenModal = ({
     setIsTokenSelectionOpen(false);
   };
 
-  const handleSliderChange = (newValues: number[]) => {
-    setSliderValues(newValues);
-    
-    const newTokenAmounts: { [key: string]: number } = {};
-    selectedTokens.forEach((tokenAddress, index) => {
-      newTokenAmounts[tokenAddress] = newValues[index];
+  const handleSliderChange = (value: number) => {
+    if (selectedTokens.length !== 2) return; 
+  
+    const [tokenA, tokenB] = selectedTokens;
+    const tokenAAmount = value;
+    const tokenBAmount = totalPriceUSD - tokenAAmount;
+  
+    setSliderValues([tokenAAmount]); 
+  
+    setTokenAmounts({
+      [tokenA]: tokenAAmount,
+      [tokenB]: tokenBAmount,
     });
-    setTokenAmounts(newTokenAmounts);
   };
+  
 
-  const isConfirmDisabled = selectedTokens.length === 0 || 
-    Math.abs(sliderValues.reduce((a, b) => a + b, 0) - totalPriceUSD) > 0.01;
+  const isConfirmDisabled = selectedTokens.length === 0 ;
+
 
   useEffect(() => {
     updateTokenAmounts(sliderValues);
@@ -147,7 +166,7 @@ const SelectPaymentTokenModal = ({
     }
 
     const cardContent = (
-      <Flex direction="column" width="100%">
+      <Flex className='cursor-pointer' direction="column" width="100%">
         <Flex direction="row" align="center" gap="2" width="100%">
           <Avatar size="3" src={token.image} fallback={ticker?.[0] || 'T'} />
           <Flex direction="column" align="center" justify="center">
@@ -166,7 +185,7 @@ const SelectPaymentTokenModal = ({
       <CheckboxCards.Item 
         key={index} 
         value={token.address} 
-        className={`w-[209px] max-w-[209px] disabled:cursor-not-allowed cursor-pointer border-2 transition-colors ${
+        className={`checkout-checkbox w-[209px] max-w-[209px] disabled:cursor-not-allowed cursor-pointer border-2 transition-colors ${
           selectedTokens.includes(token.address) ? 'border-blue-500' : 'border-transparent'
         }`} 
         disabled={!isThereEnough}
@@ -273,6 +292,7 @@ const SelectPaymentTokenModal = ({
           <CheckboxCards.Root 
             value={selectedTokens} 
             onValueChange={handleTokenSelection}
+            className='checkout-checkbox-root'
           >
             <Grid columns="2" gapX="10px" gapY="5px" width="100%">
               {tokensList.map((token, index) => {
@@ -375,16 +395,22 @@ const SelectPaymentTokenModal = ({
                 )
               })}
             </Flex>
-            <Slider 
-              value={sliderValues} 
-              onValueChange={handleSliderChange} 
-              className="mt-4" 
-              step={0.01}
-              min={0}
+            <Slider
+              value={[sliderValues[0] || 0]} 
+              onValueChange={(value) => handleSliderChange(value[0])}
               max={totalPriceUSD}
+              className="mt-4 checkout-slider" 
+              step={sliderStep} 
+              color='blue'
+              highContrast
             />
+
           </Box>
         )}
+        
+          <Flex className='h-4'>
+            {tokenLimitError &&  (<Text className='text-sm text-red-600'>You can only select two tokens.</Text>) }
+          </Flex>
 
         <Flex gap="3" mt="4" justify="end">
           <Button 
