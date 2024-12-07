@@ -333,7 +333,7 @@ const SelectPaymentTokenModal = ({
           </Grid>
         )}
 
-        {selectedTokens.length > 0 && hasAnyTokenWithEnoughBalance && (
+        {selectedTokens.length > 1 && hasAnyTokenWithEnoughBalance && (
           <Box width="100%" className='bg-zinc-100 rounded p-4' mt="8">
             <Flex justify="between" wrap="wrap" gap="2">
               {selectedTokens.map((tokenAddress, index) => {
