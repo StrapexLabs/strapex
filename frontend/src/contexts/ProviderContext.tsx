@@ -25,7 +25,9 @@ import { usePathname, useRouter } from 'next/navigation';
 export const ProviderProvider: React.FC<ProviderProviderProps> = ({ children }) => {
   const pathname = usePathname();
   const router = useRouter();
-  const isTestnet = pathname.startsWith('/test');
+  const isTestnet = pathname.includes('test');
+  console.log("Pathname is", pathname)
+  console.log("is testnet", isTestnet)
 
   const [network, setNetwork] = useState(isTestnet ? 'sepolia' : 'mainnet');
   const [provider, setProvider] = useState(

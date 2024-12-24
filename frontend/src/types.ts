@@ -68,3 +68,23 @@ export interface Token {
     balance: number;
     decimals: number;
 }
+
+
+export type TokenToPayWith = {
+    tokenAddress: string;
+    quoteId: string;
+    slippage?: number;
+    executeApprove?: boolean;
+    options?: any;
+    amount?: number;
+  };
+  
+export type TotalPrice = {
+    priceInBaseToken: bigint;
+    baseTokenAddress: string;
+    baseTokenTicker: string;
+    baseTokenDecimals: number;
+    priceInUSDC: bigint;
+  };
+  
+export const AVNU_OPTIONS = { baseUrl: 'https://starknet.api.avnu.fi' };

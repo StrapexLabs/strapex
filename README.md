@@ -1,6 +1,7 @@
 # Strapex - Open Source alternative to Stripe
 
 Strapex is an open-source payment gateway inspired by Stripe, designed to democratize access to a free, secure, and decentralized way of transacting with businesses. By leveraging Starknet, Strapex enables fast, secure, and cost-effective transactions, while offering the enhanced user experience that Starknet provides.
+
 ![Slide4](https://github.com/user-attachments/assets/b9e4e13c-938e-4c29-a684-d94a084c0adf)
 
 
