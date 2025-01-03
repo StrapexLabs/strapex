@@ -31,8 +31,9 @@ We welcome contributions to Strapex! To contribute, please follow these steps:
    ```
 4. **Commit your changes** with clear and descriptive messages:
    ```bash
-   git commit -m "Add feature: your feature description"
+   git commit -m "feature: your feature description"
    ```
+   Other message headers you can use are `fix`, `docs`, `style`, `refactor`, `perf`, `test`, and `chore`.
 5. **Push your branch** to your forked repository:
    ```bash
    git push origin feature/your-feature-name
@@ -43,25 +44,6 @@ For more detailed guidelines, please refer to the [Git Style Guide](https://udac
 
 # Contributors
 
-<table>
-  <tbody>
-    <tr>
-      <td align="center" valign="top" width="14.28%">
-        <a href="https://github.com/machuwey">
-          <img src="https://avatars.githubusercontent.com/u/56169780?v=4&s=100" width="100px;" alt="Machuwey"/><br />
-          <sub><b>Machuwey</b></sub>
-        </a><br />
-        <a href="https://github.com/The Starknet Community/The Starknet Book/commits?author=omarespejel" title="Code">💻</a>
-        <a href="https://github.com/The Starknet Community/The Starknet Book/commits?author=omarespejel" title="Documentation">📖</a>
-      </td>
-      <td align="center" valign="top" width="14.28%">
-        <a href="https://github.com/SoarinSkySagar">
-          <img src="https://avatars.githubusercontent.com/u/117727361?v=4&s=100" width="100px;" alt="SoarinSkySagar"/><br />
-          <sub><b>SoarinSkySagar</b></sub>
-        </a><br />
-        <a href="https://github.com/The Starknet Community/The Starknet Book/commits?author=omarespejel" title="Code">💻</a>
-        <a href="https://github.com/The Starknet Community/The Starknet Book/commits?author=omarespejel" title="Documentation">📖</a>
-      </td>
-    </tr>
-  </tbody>
-</table>
+<a href="https://github.com/StrapexLabs/strapex/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=StrapexLabs/strapex" />
+</a>
