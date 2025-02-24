@@ -149,7 +149,7 @@ importers:
         version: link:../../packages/typescript-config
       '@worldcoin/idkit':
         specifier: ^1.1.3
-        version: 1.3.0(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(prop-types@15.8.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(tailwindcss@3.4.17(ts-node@10.9.2(@types/node@20.17.16)(typescript@5.7.3)))(typescript@5.7.3)(zod@3.24.1)
+        version: 1.3.0(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(prop-types@15.8.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(tailwindcss@3.4.17(ts-node@10.9.2(@types/node@20.17.16)(typescript@5.7.3)))(typescript@5.7.3)(zod@3.24.2)
       axios:
         specifier: ^1.6.8
         version: 1.7.9
@@ -270,6 +270,28 @@ importers:
         version: 3.4.17(ts-node@10.9.2(@types/node@20.17.16)(typescript@5.7.3))
       typescript:
         specifier: ^5
+        version: 5.7.3
+
+  packages/env:
+    dependencies:
+      dotenv:
+        specifier: ^16.4.5
+        version: 16.4.7
+      dotenv-expand:
+        specifier: ^12.0.1
+        version: 12.0.1
+      zod:
+        specifier: ^3.24.2
+        version: 3.24.2
+    devDependencies:
+      '@strapex/typescript-config':
+        specifier: workspace:*
+        version: link:../typescript-config
+      '@types/node':
+        specifier: ^20
+        version: 20.17.16
+      typescript:
+        specifier: ^5.7.3
         version: 5.7.3
 
   packages/eslint-config:
@@ -4758,6 +4780,10 @@ packages:
     resolution: {integrity: sha512-GopVGCpVS1UKH75VKHGuQFqS1Gusej0z4FyQkPdwjil2gNIv+LNsqBlboOzpJFZKVT95GkCyWJbBSdFEFUWI2A==}
     engines: {node: '>=12'}
 
+  dotenv-expand@12.0.1:
+    resolution: {integrity: sha512-LaKRbou8gt0RNID/9RoI+J2rvXsBRPMV7p+ElHlPhcSARbCPDYcYG2s1TIzAfWv4YSgyY5taidWzzs31lNV3yQ==}
+    engines: {node: '>=12'}
+
   dotenv@16.0.3:
     resolution: {integrity: sha512-7GO6HghkA5fYG9TYnNxi14/7K9f5occMlp3zXAuSxn7CKCxt9xbNWG7yF8hTCSUchlfWSe3uLmlPfigevRItzQ==}
     engines: {node: '>=12'}
@@ -8996,6 +9022,9 @@ packages:
 
   zod@3.24.1:
     resolution: {integrity: sha512-muH7gBL9sI1nciMZV67X5fTKKBLtwpZ5VBp1vsOQzj1MhrBZ4wlVCm3gedKZWLp0Oyel8sIGfeiz54Su+OVT+A==}
+
+  zod@3.24.2:
+    resolution: {integrity: sha512-lY7CDW43ECgW9u1TcT3IoXHflywfVqDYze4waEz812jR/bZ8FHDsl7pFQoSZTz5N+2NqRXs8GBwnAwo3ZNxqhQ==}
 
   zustand@3.7.2:
     resolution: {integrity: sha512-PIJDIZKtokhof+9+60cpockVOq05sJzHCriyvaLBmEJixseQ1a5Kdov6fWZfWOu5SK9c+FhH1jU0tntLxRJYMA==}
@@ -13445,11 +13474,11 @@ snapshots:
       '@walletconnect/window-getters': 1.0.1
       tslib: 1.14.1
 
-  '@worldcoin/idkit-core@1.3.0(@types/react@18.3.18)(react@18.3.1)(typescript@5.7.3)(zod@3.24.1)':
+  '@worldcoin/idkit-core@1.3.0(@types/react@18.3.18)(react@18.3.1)(typescript@5.7.3)(zod@3.24.2)':
     dependencies:
       browser-or-node: 3.0.0-pre.0
       buffer: 6.0.3
-      viem: 2.22.17(typescript@5.7.3)(zod@3.24.1)
+      viem: 2.22.17(typescript@5.7.3)(zod@3.24.2)
       zustand: 4.5.6(@types/react@18.3.18)(react@18.3.1)
     transitivePeerDependencies:
       - '@types/react'
@@ -13460,12 +13489,12 @@ snapshots:
       - utf-8-validate
       - zod
 
-  '@worldcoin/idkit@1.3.0(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(prop-types@15.8.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(tailwindcss@3.4.17(ts-node@10.9.2(@types/node@20.17.16)(typescript@5.7.3)))(typescript@5.7.3)(zod@3.24.1)':
+  '@worldcoin/idkit@1.3.0(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(prop-types@15.8.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(tailwindcss@3.4.17(ts-node@10.9.2(@types/node@20.17.16)(typescript@5.7.3)))(typescript@5.7.3)(zod@3.24.2)':
     dependencies:
       '@radix-ui/react-dialog': 1.1.5(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@radix-ui/react-toast': 1.2.5(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@tailwindcss/forms': 0.5.10(tailwindcss@3.4.17(ts-node@10.9.2(@types/node@20.17.16)(typescript@5.7.3)))
-      '@worldcoin/idkit-core': 1.3.0(@types/react@18.3.18)(react@18.3.1)(typescript@5.7.3)(zod@3.24.1)
+      '@worldcoin/idkit-core': 1.3.0(@types/react@18.3.18)(react@18.3.1)(typescript@5.7.3)(zod@3.24.2)
       copy-to-clipboard: 3.3.3
       framer-motion: 11.18.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       qrcode: 1.5.4
@@ -13521,10 +13550,10 @@ snapshots:
       fs-extra: 10.1.0
       yargs: 17.7.2
 
-  abitype@1.0.8(typescript@5.7.3)(zod@3.24.1):
+  abitype@1.0.8(typescript@5.7.3)(zod@3.24.2):
     optionalDependencies:
       typescript: 5.7.3
-      zod: 3.24.1
+      zod: 3.24.2
 
   abort-controller@3.0.0:
     dependencies:
@@ -14579,6 +14608,10 @@ snapshots:
       is-obj: 2.0.0
 
   dotenv-expand@10.0.0: {}
+
+  dotenv-expand@12.0.1:
+    dependencies:
+      dotenv: 16.4.7
 
   dotenv@16.0.3: {}
 
@@ -17020,14 +17053,14 @@ snapshots:
       object-keys: 1.1.1
       safe-push-apply: 1.0.0
 
-  ox@0.6.7(typescript@5.7.3)(zod@3.24.1):
+  ox@0.6.7(typescript@5.7.3)(zod@3.24.2):
     dependencies:
       '@adraffy/ens-normalize': 1.11.0
       '@noble/curves': 1.8.1
       '@noble/hashes': 1.7.1
       '@scure/bip32': 1.6.2
       '@scure/bip39': 1.5.4
-      abitype: 1.0.8(typescript@5.7.3)(zod@3.24.1)
+      abitype: 1.0.8(typescript@5.7.3)(zod@3.24.2)
       eventemitter3: 5.0.1
     optionalDependencies:
       typescript: 5.7.3
@@ -19273,15 +19306,15 @@ snapshots:
 
   vary@1.1.2: {}
 
-  viem@2.22.17(typescript@5.7.3)(zod@3.24.1):
+  viem@2.22.17(typescript@5.7.3)(zod@3.24.2):
     dependencies:
       '@noble/curves': 1.8.1
       '@noble/hashes': 1.7.1
       '@scure/bip32': 1.6.2
       '@scure/bip39': 1.5.4
-      abitype: 1.0.8(typescript@5.7.3)(zod@3.24.1)
+      abitype: 1.0.8(typescript@5.7.3)(zod@3.24.2)
       isows: 1.0.6(ws@8.18.0)
-      ox: 0.6.7(typescript@5.7.3)(zod@3.24.1)
+      ox: 0.6.7(typescript@5.7.3)(zod@3.24.2)
       ws: 8.18.0
     optionalDependencies:
       typescript: 5.7.3
@@ -19511,6 +19544,8 @@ snapshots:
   zdog@1.1.3: {}
 
   zod@3.24.1: {}
+
+  zod@3.24.2: {}
 
   zustand@3.7.2(react@18.3.1):
     optionalDependencies:

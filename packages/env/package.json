@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json.schemastore.org/package.json",
+  "name": "@strapex/env",
+  "version": "1.0.0",
+  "private": true,
+  "main": "./build/index.js",
+  "types": "./build/index.d.ts",
+  "files": [
+    "build/**"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf build"
+  },
+  "devDependencies": {
+    "@strapex/typescript-config": "workspace:*",
+    "@types/node": "^20",
+    "typescript": "^5.7.3"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "dotenv-expand": "^12.0.1",
+    "zod": "^3.24.2"
+  }
+}
