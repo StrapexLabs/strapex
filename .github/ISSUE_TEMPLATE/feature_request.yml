@@ -1,0 +1,48 @@
+name: "Feature Request"
+description: "Suggest an idea or improvement for the project"
+title: '[scope]: '
+labels: ['area: request']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ### Thanks for taking the time to create a feature request! Please search open/closed issues before submitting, as the issue may have already been reported/addressed.
+  - type: textarea
+    id: feature-description
+    attributes:
+      label: Feature description
+      description: Tell us about your feature request
+      placeholder: 'I think this feature would be great because...'
+      value: 'Describe your feature request...'
+    validations:
+      required: true
+
+  - type: textarea
+    id: current_limitations
+    attributes:
+      label: "Current Limitations"
+      description: "Describe the current limitations or problem that this feature would solve."
+      placeholder: "Explain why this feature is necessary."
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed_solution
+    attributes:
+      label: "Proposed Solution"
+      description: "Provide details on how you think the feature should be implemented."
+      placeholder: "Describe your proposed implementation."
+
+  - type: textarea
+    id: acceptance_criteria
+    attributes:
+      label: "Acceptance Criteria"
+      description: "Define what needs to be accomplished for this feature to be considered complete."
+      placeholder: "- [ ] Criteria 1\n- [ ] Criteria 2\n- [ ] Tests updated\n- [ ] Documentation updated"
+
+  - type: textarea
+    id: additional_info
+    attributes:
+      label: "Additional Information"
+      description: "Any other information that might be relevant to the feature request."
+      placeholder: "Provide any extra details or context."

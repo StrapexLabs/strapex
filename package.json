@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json.schemastore.org/package.json",
+  "name": "strapex",
+  "version": "0.0.0",
+  "description": "Open-source payment gateway on Starknet for secure, decentralized, and cost-effective transactions.",
+  "homepage": "https://github.com/strapexlabs/strapex#readme",
+  "bugs": {
+    "url": "https://github.com/strapexlabs/strapex/issues"
+  },
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/strapexlabs/strapex.git"
+  },
+  "engines": {
+    "node": ">=14"
+  },
+  "packageManager": "pnpm@9.8.0",
+  "scripts": {
+    "prepare": "husky install",
+    "build": "turbo run build",
+    "clean": "turbo run clean",
+    "dev": "turbo run dev --parallel",
+    "backend:dev": "turbo --filter=@strapex/api dev",
+    "backend:start": "pnpm --filter=@strapex/api start:dev",
+    "backend:build": "pnpm --filter=@strapex/api build",
+    "www:dev": "pnpm --filter=@strapex/www dev",
+    "www:build": "pnpm --filter=@strapex/www build",
+    "lint": "turbo run lint",
+    "lint:fix": "turbo run lint:fix",
+    "typecheck": "turbo run typecheck",
+    "format:write": "turbo run format:write",
+    "format:check": "turbo run format:check",
+    "check": "turbo lint typecheck format:check",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^19.7.1",
+    "@commitlint/config-conventional": "^19.7.1",
+    "husky": "^9.1.7",
+    "turbo": "^2.3.4"
+  }
+}

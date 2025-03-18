@@ -1,0 +1,48 @@
+name: "Bug Report"
+description: "Report an issue"
+title: '[bug]: '
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ### Description\nA clear and concise description of the issue.
+
+  - type: textarea
+    id: current_behavior
+    attributes:
+      label: "Current Behavior"
+      description: "Describe what currently happens. Include error messages or screenshots if applicable."
+      placeholder: "Provide details about the problem."
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected_behavior
+    attributes:
+      label: "Expected Behavior"
+      description: "Describe what you expected to happen instead."
+      placeholder: "Provide details about the expected outcome."
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction_steps
+    attributes:
+      label: "Reproduction Steps"
+      description: "Provide step-by-step instructions to reproduce the issue."
+      placeholder: "1. Go to...\n2. Click on...\n3. See error"
+
+  - type: input
+    id: environment
+    attributes:
+      label: "Environment Information"
+      description: "Browser, environment, or package version details."
+      placeholder: "E.g., Chrome 120, Node.js 18, v1.2.0"
+
+  - type: textarea
+    id: additional_info
+    attributes:
+      label: "Additional Information"
+      description: "Any other information that might help diagnose or solve the issue."
+      placeholder: "Provide any extra details you think are important."

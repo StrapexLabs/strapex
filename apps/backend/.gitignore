@@ -1,0 +1,4 @@
+node_modules 
+.envsendgrid.env
+/src/temp
+.env

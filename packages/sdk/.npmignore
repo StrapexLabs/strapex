@@ -1,0 +1,9 @@
+node_modules
+src
+.venv
+.storybook
+.env
+.gitignore
+.git
+rollup.config.js
+tsconfig.json
