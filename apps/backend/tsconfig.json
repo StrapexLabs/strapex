@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig.json",
+  "extends": "@strapex/typescript-config/base.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "sourceMap": true,
+    "strict": true,
+    "noImplicitAny": true,
+    "allowSyntheticDefaultImports": true,
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules"]
+}

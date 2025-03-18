@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json.schemastore.org/package.json",
+  "name": "@strapex/eslint-config",
+  "version": "0.0.0",
+  "type": "module",
+  "private": true,
+  "exports": {
+    "./base": "./base.js",
+    "./base-turbo": "./base-turbo.js",
+    "./next-js": "./next.js"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.19.0",
+    "@next/eslint-plugin-next": "^15.1.6",
+    "eslint": "^9.19.0",
+    "eslint-config-prettier": "^10.0.1",
+    "eslint-import-resolver-typescript": "^3.7.0",
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-only-warn": "^1.1.0",
+    "eslint-plugin-prettier": "^5.2.3",
+    "eslint-plugin-react": "^7.37.4",
+    "eslint-plugin-react-hooks": "^5.1.0",
+    "eslint-plugin-tailwindcss": "^3.18.0",
+    "eslint-plugin-turbo": "^2.3.4",
+    "globals": "^15.14.0",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.3",
+    "typescript-eslint": "^8.21.0"
+  }
+}

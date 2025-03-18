@@ -1,0 +1,14 @@
+{
+  "extends": "@strapex/typescript-config/base.json",
+  "compilerOptions": {
+    "lib": ["es2018"],
+    "outDir": "build",
+    "rootDir": "src",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "target": "es2018",
+    "types": ["node"]
+  },
+  "include": ["src/**/*.ts", "test/**/*.ts"],
+  "exclude": ["node_modules"]
+}
