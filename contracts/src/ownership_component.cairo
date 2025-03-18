@@ -9,19 +9,19 @@ trait IOwnable<TContractState> {
 #[starknet::component]
 mod ownable_component {
     use starknet::{
-        get_caller_address, ContractAddress, get_contract_address, Zeroable, get_block_timestamp
+        get_caller_address, ContractAddress, get_contract_address, Zeroable, get_block_timestamp,
     };
     use super::Errors;
 
     #[storage]
     struct Storage {
-        owner: ContractAddress
+        owner: ContractAddress,
     }
 
     #[event]
     #[derive(Drop, starknet::Event)]
     enum Event {
-        OwnershipTransferred: OwnershipTransferred
+        OwnershipTransferred: OwnershipTransferred,
     }
 
     #[derive(Drop, starknet::Event)]
@@ -32,14 +32,14 @@ mod ownable_component {
 
     #[embeddable_as(Ownable)]
     impl OwnableImpl<
-        TContractState, +HasComponent<TContractState>
+        TContractState, +HasComponent<TContractState>,
     > of super::IOwnable<ComponentState<TContractState>> {
         fn owner(self: @ComponentState<TContractState>) -> ContractAddress {
             self.owner.read()
         }
 
         fn transfer_ownership(
-            ref self: ComponentState<TContractState>, new_owner: ContractAddress
+            ref self: ComponentState<TContractState>, new_owner: ContractAddress,
         ) {
             assert(!new_owner.is_zero(), Errors::ZERO_ADDRESS_OWNER);
             self.assert_only_owner();
@@ -54,7 +54,7 @@ mod ownable_component {
 
     #[generate_trait]
     impl InternalImpl<
-        TContractState, +HasComponent<TContractState>
+        TContractState, +HasComponent<TContractState>,
     > of InternalTrait<TContractState> {
         fn initializer(ref self: ComponentState<TContractState>, owner: ContractAddress) {
             self._transfer_ownership(owner);
@@ -68,13 +68,13 @@ mod ownable_component {
         }
 
         fn _transfer_ownership(
-            ref self: ComponentState<TContractState>, new_owner: ContractAddress
+            ref self: ComponentState<TContractState>, new_owner: ContractAddress,
         ) {
             let previous_owner: ContractAddress = self.owner.read();
             self.owner.write(new_owner);
             self
                 .emit(
-                    OwnershipTransferred { previous_owner: previous_owner, new_owner: new_owner }
+                    OwnershipTransferred { previous_owner: previous_owner, new_owner: new_owner },
                 );
         }
     }

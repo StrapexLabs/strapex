@@ -10,7 +10,7 @@ trait IERC20<TContractState> {
     fn allowance(self: @TContractState, owner: ContractAddress, spender: ContractAddress) -> u256;
     fn transfer(ref self: TContractState, recipient: ContractAddress, amount: u256) -> bool;
     fn transferFrom(
-        ref self: TContractState, sender: ContractAddress, recipient: ContractAddress, amount: u256
+        ref self: TContractState, sender: ContractAddress, recipient: ContractAddress, amount: u256,
     ) -> bool;
     fn approve(ref self: TContractState, spender: ContractAddress, amount: u256) -> bool;
 }
@@ -35,7 +35,7 @@ pub mod StrapexContract {
     use core::traits::Into;
     use core::box::BoxTrait;
     use starknet::{
-        get_caller_address, get_contract_address, ContractAddress, Zeroable, get_execution_info
+        get_caller_address, get_contract_address, ContractAddress, Zeroable, get_execution_info,
     };
     use contract_strapex::ownership_component::ownable_component;
     use super::{IERC20Dispatcher, IERC20DispatcherTrait};
@@ -119,7 +119,7 @@ pub mod StrapexContract {
         ref self: ContractState,
         manager: ContractAddress,
         _owner: ContractAddress,
-        _token: ContractAddress
+        _token: ContractAddress,
     ) {
         assert(!_owner.is_zero(), Errors::Address_Zero_Owner);
         self.ownable.initializer(_owner);
@@ -149,8 +149,8 @@ pub mod StrapexContract {
                         amount: amount,
                         token: self.token.read().contract_address,
                         id: id,
-                        refunded: 0.into()
-                    }
+                        refunded: 0.into(),
+                    },
                 );
 
             // Update the taxable amount
@@ -163,8 +163,8 @@ pub mod StrapexContract {
                         from: caller,
                         Amount: amount,
                         id: id,
-                        token: self.token.read().contract_address
-                    }
+                        token: self.token.read().contract_address,
+                    },
                 );
         }
 
@@ -282,9 +282,9 @@ pub mod StrapexContract {
             assert(caller == owner, Errors::UnAuthorized_Caller);
 
             let (_, _, _) = self.getImportantAddresses();
-            let Payment { buyer, amount: total_amount, token, id, refunded } = self
-                .payments
-                .read(tx_hash);
+            let Payment {
+                buyer, amount: total_amount, token, id, refunded,
+            } = self.payments.read(tx_hash);
             assert(refunded + amount <= total_amount, Errors::Refund_Exceeds_Amount);
 
             // Generalized for future support of multi tokens
@@ -295,7 +295,7 @@ pub mod StrapexContract {
                 .payments
                 .write(
                     tx_hash,
-                    Payment { buyer, amount: total_amount, token, id, refunded: refunded + amount }
+                    Payment { buyer, amount: total_amount, token, id, refunded: refunded + amount },
                 );
         }
 
