@@ -7,11 +7,10 @@ use snforge_std::{
     ContractClassTrait, DeclareResultTrait, spy_events, EventSpyAssertionsTrait,
 };
 
-use contract_strapex::strapex_factory::{
-    IStrapexFactory, IStrapexFactoryDispatcher, IStrapexFactoryDispatcherTrait,
+use contract_strapex::interfaces::{
+    IStrapexFactoryDispatcher, IStrapexFactoryDispatcherTrait, IStrapexDispatcher, IStrapexDispatcherTrait,
 };
 
-use contract_strapex::strapex_contract::{IStrapex, IStrapexDispatcher, IStrapexDispatcherTrait};
 
 use contract_strapex::strapex_contract::StrapexContract::{Event, Deposit, Withdraw, FeeCollection};
 
