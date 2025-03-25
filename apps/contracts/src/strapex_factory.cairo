@@ -12,7 +12,10 @@ pub mod StrapexFactory {
     use core::starknet::event::EventEmitter;
     use starknet::syscalls::deploy_syscall;
     use starknet::{ContractAddress, ClassHash, get_caller_address};
-    use starknet::storage::{Map, StoragePointerWriteAccess, StoragePointerReadAccess, StorageMapReadAccess, StorageMapWriteAccess};
+    use starknet::storage::{
+        Map, StoragePointerWriteAccess, StoragePointerReadAccess, StorageMapReadAccess,
+        StorageMapWriteAccess,
+    };
 
     use openzeppelin::access::ownable::OwnableComponent;
     use openzeppelin::access::ownable::interface::IOwnable;

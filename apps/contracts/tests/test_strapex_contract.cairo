@@ -8,7 +8,8 @@ use snforge_std::{
 };
 
 use contract_strapex::interfaces::{
-    IStrapexFactoryDispatcher, IStrapexFactoryDispatcherTrait, IStrapexDispatcher, IStrapexDispatcherTrait,
+    IStrapexFactoryDispatcher, IStrapexFactoryDispatcherTrait, IStrapexDispatcher,
+    IStrapexDispatcherTrait,
 };
 
 

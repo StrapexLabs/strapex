@@ -9,10 +9,11 @@ pub mod StrapexContract {
     use core::traits::Into;
     use core::box::BoxTrait;
     use core::num::traits::zero::Zero;
-    use starknet::{
-        get_caller_address, get_contract_address, ContractAddress, get_execution_info,
+    use starknet::{get_caller_address, get_contract_address, ContractAddress, get_execution_info};
+    use starknet::storage::{
+        Map, StoragePointerWriteAccess, StoragePointerReadAccess, StorageMapReadAccess,
+        StorageMapWriteAccess,
     };
-    use starknet::storage::{Map, StoragePointerWriteAccess, StoragePointerReadAccess, StorageMapReadAccess, StorageMapWriteAccess};
 
     use openzeppelin::access::ownable::interface::IOwnable;
     use openzeppelin::access::ownable::OwnableComponent;
@@ -273,7 +274,10 @@ pub mod StrapexContract {
         fn get_fees_to_collect(self: @ContractState) -> u256 {
             let caller: ContractAddress = get_caller_address();
             let owner = self.ownable.owner();
-            assert(caller == owner || caller == self.manager.read(), ContractErrors::UnAuthorized_Caller);
+            assert(
+                caller == owner || caller == self.manager.read(),
+                ContractErrors::UnAuthorized_Caller,
+            );
 
             let current_balance: u256 = self.balance.read();
             let fee_percentage = self.fee_percentage.read();
