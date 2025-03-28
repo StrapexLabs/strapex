@@ -3,8 +3,9 @@
 // *************************************************************************
 
 #[starknet::contract]
-mod MyToken {
+pub mod MyToken {
     use openzeppelin::token::erc20::{ERC20Component, ERC20HooksEmptyImpl};
+    use starknet::ContractAddress;
 
     component!(path: ERC20Component, storage: erc20, event: ERC20Event);
 
@@ -29,7 +30,8 @@ mod MyToken {
     }
 
     #[constructor]
-    fn constructor(ref self: ContractState) {
+    fn constructor(ref self: ContractState, initial_supply: u256, recipient: ContractAddress) {
         self.erc20.initializer("MyToken", "MTK");
+        self.erc20._mint(recipient, initial_supply);
     }
 }
