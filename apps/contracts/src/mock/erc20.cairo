@@ -32,6 +32,6 @@ pub mod MyToken {
     #[constructor]
     fn constructor(ref self: ContractState, initial_supply: u256, recipient: ContractAddress) {
         self.erc20.initializer("MyToken", "MTK");
-        self.erc20._mint(recipient, initial_supply);
+        self.erc20.mint(recipient, initial_supply);
     }
 }

@@ -5,8 +5,8 @@
 use starknet::{ClassHash, ContractAddress, contract_address_const};
 
 use snforge_std::{
-    declare, start_cheat_caller_address, stop_cheat_caller_address,
-    ContractClassTrait, DeclareResultTrait, spy_events, EventSpyAssertionsTrait, EventSpyTrait, EventsFilterTrait 
+    declare, start_cheat_caller_address, stop_cheat_caller_address, ContractClassTrait,
+    DeclareResultTrait, spy_events, EventSpyAssertionsTrait, EventSpyTrait, EventsFilterTrait,
 };
 
 use contract_strapex::interfaces::{
@@ -285,7 +285,6 @@ fn test_strapex_owner_transfer_ownership() {
         @selector!("OwnershipTransferred"),
         "OwnershipTransferred event wasn't emitted",
     );
-    
 }
 
 #[test]
