@@ -178,12 +178,16 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
   const connectToStarknet = async () => {
     await disconnect();
     await delay(1000);
-    const { wallet } = await connect();
+    const { wallet, connector, connectorData } = await connect({
+      modalMode: "alwaysAsk",
+      dappName: "Strapex",
+      modalTheme: "dark",
+    });
     console.log("Attempting to connect");
-    if (wallet && wallet.isConnected) {
+    if (wallet && wallet?.isConnected) {
       setConnection(wallet);
-      setAccount(wallet.account);
-      setAddress(wallet.selectedAddress);
+      setAccount(wallet?.account);
+      setAddress(connectorData?.account!);
     } else {
       return;
     }

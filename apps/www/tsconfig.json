@@ -13,7 +13,7 @@
         "./src/*"
       ]
     },
-    "incremental": true
+    "incremental": true,
   },
   "include": [
     "**/*.ts",

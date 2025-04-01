@@ -14,6 +14,7 @@ import { StarknetWindowObject, connect, disconnect } from "starknetkit";
 import { useProvider } from "./ProviderContext";
 import { app } from "../../realmconfig";
 import abi from "../abis/abi.json";
+import { useAccount } from '@starknet-react/core'
 
 dotenv.config();
 export enum UserMode {
@@ -30,7 +31,7 @@ interface UserContextType {
   connection: StarknetWindowObject | null;
   account: Account | null;
   contractAddress: string | null;
-  address: string | null;
+  address: string | undefined | null;
   userId: string | null; // Added userId to the context
 }
 
@@ -140,37 +141,63 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   }, [providerContext]);
 
   const login = async () => {
-    const { wallet } = await connect({
-      modalMode: "canAsk",
-      provider: providerContext?.provider,
+    const res = await connect({
+      modalMode: "alwaysAsk",
+      modalTheme: "dark",
+      dappName: "Strapex",
+      resultType: "wallet",
     });
 
-    if (wallet && wallet.isConnected) {
-      const response = await fetch("/api/generateJWToken", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ walletAddress: wallet.selectedAddress }),
-      });
+    const { wallet, connector, connectorData } = res
+    console.log(wallet)
+    console.log(connector)
+    console.log(connectorData)
+    console.log(connectorData?.account)
+    console.log(typeof connectorData?.account)
 
-      if (!response.ok) {
-        throw new Error("Failed to generate JWT token");
-      }
+    const chainId = await wallet?.request({
+      type: "wallet_requestChainId"
+    })
 
-      const { token } = await response.json();
+    console.log(chainId)
 
-      await app.logIn(Realm.Credentials.jwt(token));
-      const userId = app.currentUser?.id;
-      console.log("User logged in: ", userId);
-
-      setConnection(wallet);
-      setAccount(wallet.account);
-      setAddress(wallet.selectedAddress);
-      setUserId(userId ?? null);
-      setIsLoggedIn(true);
+    if (!wallet || !connector || !connectorData) {
+      console.log('No wallet, connector or connectorData')
+      return null
     }
+
+    const response = await fetch("/api/generateJWToken", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      // Braavos wallet returns a value of undefined for selectedAddress property of a wallet, so it is a problem
+      body: JSON.stringify({ walletAddress: connectorData?.account }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to generate JWT token");
+    }
+
+    const { token } = await response.json();
+
+    await app.logIn(Realm.Credentials.jwt(token));
+    const userId = app.currentUser?.id;
+    console.log("User logged in: ", userId);
+
+    setConnection(wallet);
+    setAccount(wallet?.account);
+    setAddress(connectorData?.account!);
+    setUserId(userId ?? null);
+    setIsLoggedIn(true);
+    console.log(isLoggedIn)
   };
+
+  const switchChain = async () => {
+    if (connection || connection === null) return
+    
+
+  }
 
   const logout = async () => {
     await disconnect({

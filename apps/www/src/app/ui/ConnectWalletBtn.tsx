@@ -3,8 +3,8 @@ import { PersonIcon, CaretDownIcon } from "@radix-ui/react-icons";
 import { Button, DropdownMenu, Switch } from "@radix-ui/themes";
 import { usePathname } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
-import { Account } from "starknet";
-import { StarknetWindowObject, connect, disconnect } from "starknetkit";
+// import { Account } from "starknet";
+// import { StarknetWindowObject, connect, disconnect } from "starknetkit";
 
 import { useProvider } from "@/contexts/ProviderContext";
 import { UserMode, useUser } from "@/contexts/UserContext";
@@ -14,14 +14,15 @@ export default function ConnectWalletBtn() {
   const userContext = useUser();
   const providerContext = useProvider();
   const pathname = usePathname();
+  const isLoggedIn = userContext?.isLoggedIn
 
   useEffect(() => {
-    if (userContext?.isLoggedIn) {
+    if (isLoggedIn) {
       console.log("Logged in");
     }
-  }, [userContext?.isLoggedIn]);
+  }, [isLoggedIn]);
 
-  return userContext?.isLoggedIn ? (
+  return isLoggedIn ? (
     <DropdownMenu.Root>
       <DropdownMenu.Trigger>
         <Button variant="soft" className="text-main">

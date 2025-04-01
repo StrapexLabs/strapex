@@ -49,7 +49,7 @@
     "react-spring": "^9.7.3",
     "realm-web": "^2.0.0",
     "starknet": "^5.25.0",
-    "starknetkit": "^1.1.9",
+    "starknetkit": "^2.3.2",
     "strapex-react": "^1.0.0",
     "tailwind-merge": "^2.2.1",
     "tailwindcss-animate": "^1.0.7"
