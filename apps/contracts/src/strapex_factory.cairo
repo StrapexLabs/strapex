@@ -1,30 +1,24 @@
-use starknet::{ContractAddress, ClassHash};
-
-#[starknet::interface]
-trait IStrapexFactory<TContractState> {
-    fn create_strapex_contract(ref self: TContractState) -> ContractAddress;
-    fn updateStrapexChildHash(ref self: TContractState, newClassHash: ClassHash);
-    fn updateDepositToken(ref self: TContractState, newDepositToken: ContractAddress);
-    fn getStrapexAccountsNumber(self: @TContractState) -> u128;
-    fn getUserStrapexAccount(
-        self: @TContractState, userAddress: ContractAddress,
-    ) -> ContractAddress;
-    fn get_owner(self: @TContractState) -> ContractAddress;
-    fn _transfer_ownership(ref self: TContractState, newOwner: ContractAddress);
-    fn _renounce_ownership(ref self: TContractState);
-    fn get_childClassHash(self: @TContractState) -> ClassHash;
-}
+// *************************************************************************
+//                              FACTORY CONTRACT
+// *************************************************************************
 
 #[starknet::contract]
-mod StrapexFactory {
+pub mod StrapexFactory {
+    use contract_strapex::utils::FactoryErrors;
+    use contract_strapex::interfaces::{IStrapexFactory};
     use core::traits::Into;
     use core::array::ArrayTrait;
-    use starknet::deploy_syscall;
-    use starknet::{ContractAddress, ClassHash, Zeroable, get_caller_address};
+    use core::num::traits::zero::Zero;
     use core::starknet::event::EventEmitter;
+    use starknet::syscalls::deploy_syscall;
+    use starknet::{ContractAddress, ClassHash, get_caller_address};
+    use starknet::storage::{
+        Map, StoragePointerWriteAccess, StoragePointerReadAccess, StorageMapReadAccess,
+        StorageMapWriteAccess,
+    };
+
     use openzeppelin::access::ownable::OwnableComponent;
     use openzeppelin::access::ownable::interface::IOwnable;
-    use starknet::storage::Map;
     component!(path: OwnableComponent, storage: ownable, event: OwnableEvent);
 
     #[abi(embed_v0)]
@@ -80,14 +74,6 @@ mod StrapexFactory {
         newToken: ContractAddress,
     }
 
-    mod Errors {
-        const Address_Zero_Owner: felt252 = 1;
-        const Unauthorized_Caller: felt252 = 2;
-        const Deployment_Failed: felt252 = 3;
-        const Invalid_Hash: felt252 = 4;
-        const Invalid_Token: felt252 = 5;
-    }
-
     #[constructor]
     fn constructor(
         ref self: ContractState,
@@ -95,9 +81,9 @@ mod StrapexFactory {
         childHash: ClassHash,
         depositToken: ContractAddress,
     ) {
-        assert(!owner.is_zero(), Errors::Address_Zero_Owner);
-        assert(!childHash.is_zero(), Errors::Invalid_Hash);
-        assert(!depositToken.is_zero(), Errors::Invalid_Token);
+        assert(!owner.is_zero(), FactoryErrors::Address_Zero_Owner);
+        assert(!childHash.is_zero(), FactoryErrors::Invalid_Hash);
+        assert(!depositToken.is_zero(), FactoryErrors::Invalid_Token);
 
         self.totalStrapexAccountsNo.write(0);
         self.strapexChildHash.write(childHash);
@@ -106,7 +92,7 @@ mod StrapexFactory {
     }
 
     #[abi(embed_v0)]
-    impl IStrapexFactory of super::IStrapexFactory<ContractState> {
+    impl StrapexFactory of IStrapexFactory<ContractState> {
         fn create_strapex_contract(ref self: ContractState) -> ContractAddress {
             let token_addr: ContractAddress = self.depositToken.read();
             let mut constructor_calldata = ArrayTrait::new();
@@ -121,7 +107,7 @@ mod StrapexFactory {
                 false,
             );
 
-            assert(deploy_result.is_ok(), Errors::Deployment_Failed);
+            assert(deploy_result.is_ok(), FactoryErrors::Deployment_Failed);
             let (deployed_address, _) = deploy_result.unwrap();
 
             self.strapexChildOwner.write(get_caller_address(), deployed_address);
@@ -141,7 +127,7 @@ mod StrapexFactory {
 
         fn updateStrapexChildHash(ref self: ContractState, newClassHash: ClassHash) {
             self.ownable.assert_only_owner();
-            assert(!newClassHash.is_zero(), Errors::Invalid_Hash);
+            assert(!newClassHash.is_zero(), FactoryErrors::Invalid_Hash);
             let oldHash = self.strapexChildHash.read();
             self.strapexChildHash.write(newClassHash);
             self.emit(HashUpdated { by: self.ownable.owner(), oldHash, newHash: newClassHash });
@@ -149,7 +135,7 @@ mod StrapexFactory {
 
         fn updateDepositToken(ref self: ContractState, newDepositToken: ContractAddress) {
             self.ownable.assert_only_owner();
-            assert(!newDepositToken.is_zero(), Errors::Invalid_Token);
+            assert(!newDepositToken.is_zero(), FactoryErrors::Invalid_Token);
             let oldToken = self.depositToken.read();
             self.depositToken.write(newDepositToken);
             self
@@ -167,7 +153,7 @@ mod StrapexFactory {
         fn getUserStrapexAccount(
             self: @ContractState, userAddress: ContractAddress,
         ) -> ContractAddress {
-            assert(!userAddress.is_zero(), Errors::Address_Zero_Owner);
+            assert(!userAddress.is_zero(), FactoryErrors::Address_Zero_Owner);
             self.strapexChildOwner.read(userAddress)
         }
 
@@ -185,7 +171,7 @@ mod StrapexFactory {
 
         fn get_childClassHash(self: @ContractState) -> ClassHash {
             let currentHash = self.strapexChildHash.read();
-            assert(!currentHash.is_zero(), Errors::Invalid_Hash);
+            assert(!currentHash.is_zero(), FactoryErrors::Invalid_Hash);
             currentHash
         }
     }
