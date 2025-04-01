@@ -61,24 +61,24 @@ pub mod StrapexContract {
     #[derive(Drop, starknet::Event)]
     pub struct Deposit {
         #[key]
-        from: ContractAddress,
+        pub from: ContractAddress,
         #[key]
-        Amount: u256,
-        token: ContractAddress,
+        pub Amount: u256,
+        pub token: ContractAddress,
         #[key]
-        id: u128,
+        pub id: u128,
     }
 
     #[derive(Drop, starknet::Event)]
     pub struct Withdraw {
         #[key]
-        Amount: u256,
+        pub Amount: u256,
     }
 
     #[derive(Drop, starknet::Event)]
     pub struct FeeCollection {
         #[key]
-        Amount: u256,
+        pub Amount: u256,
     }
 
 
