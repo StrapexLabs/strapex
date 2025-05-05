@@ -1,0 +1,20 @@
+services:
+  katana:
+    image: ghcr.io/dojoengine/katana:v1.5.0
+    command: katana --dev --dev.no-fee --http.addr 0.0.0.0 --http.cors_origins "*" --silent
+    ports:
+      - "5050:5050"
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:5050"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  contracts:
+    build: apps/contracts
+    environment:
+      - STARKNET_ACCOUNT=katana-0
+      - STARKNET_RPC=http://katana:5050
+    depends_on:
+      katana:
+        condition: service_healthy
