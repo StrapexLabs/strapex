@@ -1,8 +1,9 @@
 "use client";
 import { PersonIcon, CaretDownIcon } from "@radix-ui/react-icons";
 import { Button, DropdownMenu, Switch } from "@radix-ui/themes";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState, useRef } from "react";
+import { useEffect } from "react";
 // import { Account } from "starknet";
 // import { StarknetWindowObject, connect, disconnect } from "starknetkit";
 
@@ -14,7 +15,7 @@ export default function ConnectWalletBtn() {
   const userContext = useUser();
   const providerContext = useProvider();
   const pathname = usePathname();
-  const isLoggedIn = userContext?.isLoggedIn
+  const isLoggedIn = userContext?.isLoggedIn;
 
   useEffect(() => {
     if (isLoggedIn) {
@@ -32,10 +33,10 @@ export default function ConnectWalletBtn() {
       </DropdownMenu.Trigger>
       <DropdownMenu.Content>
         <DropdownMenu.Item>
-          <a href={getRoute("/accounts", pathname)}>Accounts</a>
+          <Link href={getRoute("/accounts", pathname)}>Accounts</Link>
         </DropdownMenu.Item>
         <DropdownMenu.Item>
-          <a href={getRoute("/createBiz", pathname)}>Create biz</a>
+          <Link href={getRoute("/createBiz", pathname)}>Create biz</Link>
         </DropdownMenu.Item>
 
         <DropdownMenu.Item onClick={userContext?.toggleMode}>

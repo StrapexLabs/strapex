@@ -15,7 +15,6 @@
   "engines": {
     "node": ">=14"
   },
-  "packageManager": "pnpm@9.8.0",
   "scripts": {
     "prepare": "husky install",
     "build": "turbo run build",

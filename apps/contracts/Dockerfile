@@ -1,13 +1,6 @@
-FROM ubuntu:latest
+FROM rust:latest
 
 ENV HOME="/home"
-
-RUN apt update && apt install -y build-essential curl git
-
-# install rust
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-
-ENV PATH="$HOME/.cargo/bin:$PATH"
 
 # install asdf
 ENV ASDF_VERSION="0.16.7"

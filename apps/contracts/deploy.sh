@@ -1,6 +1,6 @@
 #!/bin/bash
 
-starkli deploy\
+starkli deploy --salt 0\
   $(starkli declare target/dev/contract_strapex_StrapexFactory.contract_class.json | tail -1)\
   0x127fd5f1fe78a71f8bcd1fec63e3fe2f0486b6ecd5c86a0466c3a21fa5cfcec\
   $(starkli declare target/dev/contract_strapex_StrapexContract.contract_class.json | tail -1)\

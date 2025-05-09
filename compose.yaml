@@ -1,9 +1,13 @@
+include:
+  - path:
+      - apps/supabase/docker-compose.yml
+      - apps/supabase/dev/docker-compose.dev.yml
 services:
   katana:
     image: ghcr.io/dojoengine/katana:v1.5.0
-    command: katana --dev --dev.no-fee --http.addr 0.0.0.0 --http.cors_origins "*" --silent
+    command: katana --silent --explorer --dev --dev.no-fee --http.addr 0.0.0.0 --http.cors_origins "*"
     ports:
-      - "5050:5050"
+      - 5050:5050
     healthcheck:
       test: ["CMD", "curl", "--fail", "http://localhost:5050"]
       interval: 10s
@@ -18,3 +22,19 @@ services:
     depends_on:
       katana:
         condition: service_healthy
+
+  www:
+    build:
+      context: apps/www
+      additional_contexts:
+        - root=.
+    restart: always
+    volumes:
+      - ./apps/www:/home/strapex/apps/www
+      - /home/strapex/apps/www/.next
+      - /home/strapex/apps/www/node_modules
+    ports:
+      - 3333:3333
+    depends_on:
+      - contracts
+      - storage
