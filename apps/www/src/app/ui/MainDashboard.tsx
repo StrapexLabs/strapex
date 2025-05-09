@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { Contract, RpcProvider, constants, num } from "starknet";
 
-import abi from "../../abis/abi.json";
+import abi from "../../abis/abi";
 
 import { useUser } from "@/contexts/UserContext";
 

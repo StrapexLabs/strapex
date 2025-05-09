@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
   if (!walletAddress) {
     return NextResponse.json(
       { error: "Wallet address is required" },
-      { status: 400 },
+      { status: 400 }
     );
   }
 
@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
   if (!secret) {
     return NextResponse.json(
       { error: "JWT secret is not defined" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 
@@ -26,13 +26,13 @@ export async function POST(req: NextRequest) {
     const token = jwt.sign(
       { sub: walletAddress, walletAddress, aud: process.env.REALM_APP_ID },
       secret,
-      { expiresIn: "1h" },
+      { expiresIn: "1h" }
     );
     return NextResponse.json({ token }, { status: 200 });
   } catch (error) {
     return NextResponse.json(
       { error: "Error generating token" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
