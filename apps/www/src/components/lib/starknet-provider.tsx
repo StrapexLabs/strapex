@@ -37,7 +37,12 @@ const StarknetProvider = ({ children }: { children: ReactNode }) => {
   return (
     <StarknetConfig
       chains={[katana, sepolia, mainnet]}
-      provider={publicProvider()}
+      provider={publicProvider({
+        paymaster: {
+          url: "https://paymaster.avnu.fi",
+          sponsored: true,
+        },
+      })}
       connectors={connectors}
       explorer={voyager}
     >
